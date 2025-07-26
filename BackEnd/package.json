@@ -1,0 +1,28 @@
+{
+  "name": "adote-animais-api",
+  "version": "1.0.0",
+  "description": "REST API para sistema de adoção de animais",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "api",
+    "rest",
+    "nodejs",
+    "mysql",
+    "adocao",
+    "animais"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "mysql2": "^3.12.0"
+  }
+}
+
