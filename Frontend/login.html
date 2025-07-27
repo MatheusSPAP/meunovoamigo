@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdoteAnimais - Entrar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="#" class="nav-link">Início</a>
+                    <a href="#" class="nav-link">Animais</a>
+                    <a href="#" class="nav-link">Sobre nós</a>
+                </div>
+                <div class="logo">
+                    <span class="logo-icon">🐾</span>
+                    <span class="logo-text">AdoteAnimais</span>
+                </div>
+                <div class="nav-right">
+                    <a href="#" class="nav-link">Comunidade</a>
+                    <a href="#" class="nav-link">Eventos</a>
+                    <button class="btn-login active">Entrar</button>
+                    <button class="btn-register" onclick="showRegister()">Cadastrar</button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <div class="logo-main">
+                        <span class="logo-icon">🐾</span>
+                        <span class="logo-text">AdoteAnimais</span>
+                    </div>
+                    <h1 class="auth-title">Entrar</h1>
+                    <p class="auth-subtitle">Acesse sua conta e continue ajudando animais</p>
+                </div>
+
+                <div class="auth-form">
+                    <div class="form-header">
+                        <h2>Login</h2>
+                        <p>Entre com suas credenciais para acessar sua conta</p>
+                    </div>
+
+                    <form id="loginForm" class="form">
+                        <div class="form-group">
+                            <label for="loginEmail">E-mail</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">✉️</span>
+                                <input type="email" id="loginEmail" name="email" placeholder="seu@email.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loginSenha">Senha</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="loginSenha" name="senha" placeholder="Sua senha" required>
+                                <button type="button" class="toggle-password" onclick="togglePassword('loginSenha')">👁️</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="lembrarMe">
+                                <span class="checkmark"></span>
+                                Lembrar de mim
+                            </label>
+                            <a href="#" class="forgot-password">Esqueceu a senha?</a>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Entrar</button>
+                    </form>
+
+                    <div class="auth-footer">
+                        <p>Não tem uma conta? <button class="link-button" onclick="showRegister()">Cadastre-se</button></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
