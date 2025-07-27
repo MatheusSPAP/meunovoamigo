@@ -27,8 +27,7 @@ Este repositório contém o projeto "Meu Novo Amigo", um site dedicado à adoç�
 Este projeto foi desenvolvido por:
 
 - Matheus Santana
-- Alef Lisboa
-- Maiury
+- Elbert Marques
 
 
 
