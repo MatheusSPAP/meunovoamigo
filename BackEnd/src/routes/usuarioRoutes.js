@@ -10,8 +10,10 @@ const usuarioRoutes = {
                 await usuarioController.getAllUsuarios(req, res);
             } else if (method === 'GET' && req.params.id) {
                 await usuarioController.getUsuarioById(req, res);
-            } else if (method === 'POST') {
+            } else if (method === 'POST' && path === '/api/usuarios') {
                 await usuarioController.createUsuario(req, res);
+            } else if (method === 'POST' && path === '/api/usuarios/login') {
+                await usuarioController.loginUsuario(req, res);
             } else if (method === 'PUT' && req.params.id) {
                 await usuarioController.updateUsuario(req, res);
             } else if (method === 'DELETE' && req.params.id) {
@@ -24,4 +26,5 @@ const usuarioRoutes = {
 };
 
 module.exports = usuarioRoutes;
+
 
