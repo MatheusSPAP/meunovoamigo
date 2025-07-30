@@ -1,28 +1,14 @@
+const express = require("express");
 const tipoAnimalController = require("../controllers/tipoAnimalController");
 
-const tipoAnimalRoutes = {
-    async handleRequest(req, res) {
-        const path = req.url;
-        const method = req.method;
-        
-        if (path.startsWith("/api/tipos-animais")) {
-            if (method === "GET" && path === "/api/tipos-animais") {
-                await tipoAnimalController.getAllTipos(req, res);
-            } else if (method === "GET" && req.params.id) {
-                await tipoAnimalController.getTipoById(req, res);
-            } else if (method === "POST" && path === "/api/tipos-animais") {
-                await tipoAnimalController.createTipo(req, res);
-            } else if (method === "PUT" && req.params.id) {
-                await tipoAnimalController.updateTipo(req, res);
-            } else if (method === "DELETE" && req.params.id) {
-                await tipoAnimalController.deleteTipo(req, res);
-            } else {
-                res.status(404).json({ error: "Rota não encontrada" });
-            }
-        }
-    }
-};
+const router = express.Router();
 
-module.exports = tipoAnimalRoutes;
+router.get("/", tipoAnimalController.getAllTipos);
+router.get("/:id", tipoAnimalController.getTipoById);
+router.post("/", tipoAnimalController.createTipo);
+router.put("/:id", tipoAnimalController.updateTipo);
+router.delete("/:id", tipoAnimalController.deleteTipo);
+
+module.exports = router;
 
 

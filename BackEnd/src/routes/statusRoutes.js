@@ -1,28 +1,14 @@
+const express = require("express");
 const statusController = require("../controllers/statusController");
 
-const statusRoutes = {
-    async handleRequest(req, res) {
-        const path = req.url;
-        const method = req.method;
-        
-        if (path.startsWith("/api/status")) {
-            if (method === "GET" && path === "/api/status") {
-                await statusController.getAllStatus(req, res);
-            } else if (method === "GET" && req.params.id) {
-                await statusController.getStatusById(req, res);
-            } else if (method === "POST" && path === "/api/status") {
-                await statusController.createStatus(req, res);
-            } else if (method === "PUT" && req.params.id) {
-                await statusController.updateStatus(req, res);
-            } else if (method === "DELETE" && req.params.id) {
-                await statusController.deleteStatus(req, res);
-            } else {
-                res.status(404).json({ error: "Rota não encontrada" });
-            }
-        }
-    }
-};
+const router = express.Router();
 
-module.exports = statusRoutes;
+router.get("/", statusController.getAllStatus);
+router.get("/:id", statusController.getStatusById);
+router.post("/", statusController.createStatus);
+router.put("/:id", statusController.updateStatus);
+router.delete("/:id", statusController.deleteStatus);
+
+module.exports = router;
 
 
