@@ -1,123 +1,208 @@
-const Animal = require("../models/animal");
+const AnimalDb = require('../db/animalDb');
+const Animal = require('../models/animal');
 
 class AnimalController {
-    async getAllAnimais(req, res) {
+
+    // Criar novo animal
+    static async create(req, res) {
         try {
-            const animais = await Animal.getAll();
-            res.json(animais);
+            // Cria um novo objeto com os dados do request e a data de cadastro gerada pelo servidor
+            const animalData = {
+                ...req.body,
+                castrado: /^(true|1)$/i.test(req.body.castrado),
+                vacinado: /^(true|1)$/i.test(req.body.vacinado),
+                data_cadastro: new Date()
+            };
+
+            const errors = Animal.validate(animalData);
+            if (errors.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dados inválidos',
+                    errors: errors
+                });
+            }
+
+            const result = await AnimalDb.insert(animalData);
+            
+            res.status(201).json({
+                success: true,
+                message: 'Animal criado com sucesso',
+                data: { id: result.insertId }
+            });
+
         } catch (error) {
-            console.error("Erro ao buscar animais:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao criar animal:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async getAnimalById(req, res) {
+    // Listar todos os animais
+    static async getAll(req, res) {
+        try {
+            const animais = await AnimalDb.selectAll();
+
+            res.status(200).json({
+                success: true,
+                data: animais
+            });
+
+        } catch (error) {
+            console.error('Erro ao buscar animais:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    // Buscar animal por ID
+    static async getById(req, res) {
         try {
             const { id } = req.params;
-            const animal = await Animal.getById(id);
-            
+            const animal = await AnimalDb.selectById(id);
+
             if (!animal) {
-                return res.status(404).json({ error: "Animal não encontrado" });
+                return res.status(404).json({
+                    success: false,
+                    message: 'Animal não encontrado'
+                });
             }
-            
-            res.json(animal);
+
+            res.status(200).json({
+                success: true,
+                data: animal
+            });
+
         } catch (error) {
-            console.error("Erro ao buscar animal:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar animal:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async createAnimal(req, res) {
+    // Buscar animais por usuário
+    static async getByUsuario(req, res) {
         try {
-            const { nome, raca, foto, descricao, latitude, longitude, fk_idraca, fk_idusuario, fk_idstatus } = req.body;
-            
-            if (!nome || !raca || !foto || !descricao || latitude === undefined || longitude === undefined || !fk_idraca || !fk_idusuario || !fk_idstatus) {
-                return res.status(400).json({ error: "Todos os campos são obrigatórios" });
-            }
+            const { idusuario } = req.params;
+            const animais = await AnimalDb.selectByUsuario(idusuario);
 
-            const animal = await Animal.create(nome, raca, foto, descricao, latitude, longitude, fk_idraca, fk_idusuario, fk_idstatus);
-            res.status(201).json(animal);
+            res.status(200).json({
+                success: true,
+                data: animais
+            });
+
         } catch (error) {
-            console.error("Erro ao criar animal:", error);
-            if (error.message === "Usuário não encontrado" || error.message === "Status não encontrado" || error.message === "Raça não encontrada") {
-                return res.status(400).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar animais por usuário:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async updateAnimal(req, res) {
+    // Buscar animais por status
+    static async getByStatus(req, res) {
+        try {
+            const { idstatus } = req.params;
+            const animais = await AnimalDb.selectByStatus(idstatus);
+
+            res.status(200).json({
+                success: true,
+                data: animais
+            });
+
+        } catch (error) {
+            console.error('Erro ao buscar animais por status:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    // Atualizar animal
+    static async update(req, res) {
         try {
             const { id } = req.params;
-            const { nome, raca, foto, descricao, latitude, longitude, fk_idraca, fk_idusuario, fk_idstatus } = req.body;
-            
-            const animal = await Animal.update(id, nome, raca, foto, descricao, latitude, longitude, fk_idraca, fk_idusuario, fk_idstatus);
-            res.json(animal);
+
+            // Converte os campos para booleano antes de validar
+            const animalData = {
+                ...req.body,
+                castrado: /^(true|1)$/i.test(req.body.castrado),
+                vacinado: /^(true|1)$/i.test(req.body.vacinado),
+                idAnimal: id
+            };
+
+            const errors = Animal.validate(animalData);
+            if (errors.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dados inválidos',
+                    errors: errors
+                });
+            }
+
+            // Verificar se animal existe
+            const existingAnimal = await AnimalDb.selectById(id);
+            if (!existingAnimal) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Animal não encontrado'
+                });
+            }
+
+            await AnimalDb.update(animalData);
+
+            res.status(200).json({
+                success: true,
+                message: 'Animal atualizado com sucesso'
+            });
+
         } catch (error) {
-            console.error("Erro ao atualizar animal:", error);
-            if (error.message === "Animal não encontrado") {
-                return res.status(404).json({ error: error.message });
-            }
-            if (error.message === "Usuário não encontrado" || error.message === "Status não encontrado" || error.message === "Raça não encontrada" || error.message === "Nenhum campo para atualizar") {
-                return res.status(400).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao atualizar animal:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async deleteAnimal(req, res) {
+    // Deletar animal
+    static async delete(req, res) {
         try {
             const { id } = req.params;
-            
-            const result = await Animal.delete(id);
-            res.json(result);
-        } catch (error) {
-            console.error("Erro ao deletar animal:", error);
-            if (error.message === "Animal não encontrado") {
-                return res.status(404).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
-        }
-    }
 
-    async getAnimaisByStatus(req, res) {
-        try {
-            const { status } = req.params;
-            const animais = await Animal.getByStatus(status);
-            res.json(animais);
-        } catch (error) {
-            console.error("Erro ao buscar animais por status:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
-        }
-    }
-
-    async getAnimaisByTipo(req, res) {
-        try {
-            const { tipo } = req.params;
-            const animais = await Animal.getByTipo(tipo);
-            res.json(animais);
-        } catch (error) {
-            console.error("Erro ao buscar animais por tipo:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
-        }
-    }
-
-    async getAnimaisByLocation(req, res) {
-        try {
-            const { latitude, longitude, radius } = req.query;
-            
-            if (!latitude || !longitude) {
-                return res.status(400).json({ error: "Latitude e longitude são obrigatórias" });
+            // Verificar se animal existe
+            const existingAnimal = await AnimalDb.selectById(id);
+            if (!existingAnimal) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Animal não encontrado'
+                });
             }
 
-            const animais = await Animal.getByLocation(parseFloat(latitude), parseFloat(longitude), radius ? parseFloat(radius) : 10);
-            res.json(animais);
+            await AnimalDb.delete(id);
+
+            res.status(200).json({
+                success: true,
+                message: 'Animal deletado com sucesso'
+            });
+
         } catch (error) {
-            console.error("Erro ao buscar animais por localização:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao deletar animal:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 }
 
-module.exports = new AnimalController();
+module.exports = AnimalController;
 

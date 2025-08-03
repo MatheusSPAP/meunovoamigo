@@ -1,15 +1,12 @@
-const express = require("express");
-const racaController = require("../controllers/racaController");
-
+const express = require('express');
 const router = express.Router();
+const RacaController = require('../controllers/racaController');
 
-router.get("/", racaController.getAllRacas);
-router.get("/:id", racaController.getRacaById);
-router.get("/tipo/:tipoId", racaController.getRacasByTipo);
-router.post("/", racaController.createRaca);
-router.put("/:id", racaController.updateRaca);
-router.delete("/:id", racaController.deleteRaca);
+// Rotas para raças
+router.get('/', RacaController.getAll);
+router.get('/:id', RacaController.getById);
+router.post('/', RacaController.create);
+router.put('/:id', RacaController.update);
+router.delete('/:id', RacaController.delete);
 
 module.exports = router;
-
-

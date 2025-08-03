@@ -1,60 +1,40 @@
-const db = require("../db/dbConfig");
-
 class Status {
-    static async getAll() {
-        const query = 'SELECT idstatus, tipo FROM status';
-        return await db.executeQuery(query);
+    constructor(idstatus, tipo) {
+        this.idstatus = idstatus;
+        this.tipo = tipo;
     }
 
-    static async getById(id) {
-        const query = 'SELECT idstatus, tipo FROM status WHERE idstatus = ?';
-        const status = await db.executeQuery(query, [id]);
-        return status.length > 0 ? status[0] : null;
+    // Método para validar dados obrigatórios
+    static validate(data) {
+        const errors = [];
+
+        if (!data.tipo || data.tipo.trim() === '') {
+            errors.push('Tipo é obrigatório');
+        }
+
+        // Validação dos valores permitidos para tipo
+        const tiposPermitidos = ['Disponível', 'Adotado'];
+        if (data.tipo && !tiposPermitidos.includes(data.tipo)) {
+            errors.push('Tipo deve ser "Disponível" ou "Adotado"');
+        }
+
+        return errors;
     }
 
-    static async create(tipo) {
-        const checkQuery = 'SELECT idstatus FROM status WHERE tipo = ?';
-        const existingStatus = await db.executeQuery(checkQuery, [tipo]);
-        if (existingStatus.length > 0) {
-            throw new Error('Tipo de status já existe');
-        }
-        const insertQuery = 'INSERT INTO status (tipo) VALUES (?)';
-        const result = await db.executeQuery(insertQuery, [tipo]);
-        return this.getById(result.insertId);
+    // Método para criar instância a partir de dados do banco
+    static fromDatabase(row) {
+        return new Status(
+            row.idstatus,
+            row.tipo
+        );
     }
 
-    static async update(id, tipo) {
-        const checkQuery = 'SELECT idstatus FROM status WHERE idstatus = ?';
-        const existingStatus = await db.executeQuery(checkQuery, [id]);
-        if (existingStatus.length === 0) {
-            throw new Error('Status não encontrado');
-        }
-
-        const typeCheck = await db.executeQuery('SELECT idstatus FROM status WHERE tipo = ? AND idstatus != ?', [tipo, id]);
-        if (typeCheck.length > 0) {
-            throw new Error('Tipo de status já existe');
-        }
-
-        const updateQuery = 'UPDATE status SET tipo = ? WHERE idstatus = ?';
-        await db.executeQuery(updateQuery, [tipo, id]);
-        return this.getById(id);
-    }
-
-    static async delete(id) {
-        const checkQuery = 'SELECT idstatus FROM status WHERE idstatus = ?';
-        const existingStatus = await db.executeQuery(checkQuery, [id]);
-        if (existingStatus.length === 0) {
-            throw new Error('Status não encontrado');
-        }
-
-        const animalCheck = await db.executeQuery('SELECT idAnimal FROM animal WHERE fk_idstatus = ?', [id]);
-        if (animalCheck.length > 0) {
-            throw new Error('Não é possível deletar status que está sendo usado por animais');
-        }
-
-        const deleteQuery = 'DELETE FROM status WHERE idstatus = ?';
-        await db.executeQuery(deleteQuery, [id]);
-        return { message: 'Status deletado com sucesso' };
+    // Método para converter para objeto simples
+    toObject() {
+        return {
+            idstatus: this.idstatus,
+            tipo: this.tipo
+        };
     }
 }
 

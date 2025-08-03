@@ -1,99 +1,142 @@
-const Raca = require("../models/raca");
+const RacaDb = require('../db/racaDb');
 
 class RacaController {
-    async getAllRacas(req, res) {
+
+    static async getAll(req, res) {
         try {
-            const racas = await Raca.getAll();
-            res.json(racas);
+            const racas = await RacaDb.selectAll();
+
+            res.status(200).json({
+                success: true,
+                data: racas
+            });
+
         } catch (error) {
-            console.error("Erro ao buscar raças:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar raças:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async getRacaById(req, res) {
+    static async getById(req, res) {
         try {
             const { id } = req.params;
-            const raca = await Raca.getById(id);
-            
+            const raca = await RacaDb.selectById(id);
+
             if (!raca) {
-                return res.status(404).json({ error: "Raça não encontrada" });
+                return res.status(404).json({
+                    success: false,
+                    message: 'Raça não encontrada'
+                });
             }
-            
-            res.json(raca);
+
+            res.status(200).json({
+                success: true,
+                data: raca
+            });
+
         } catch (error) {
-            console.error("Erro ao buscar raça:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar raça:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async getRacasByTipo(req, res) {
+    static async create(req, res) {
         try {
-            const { tipoId } = req.params;
-            const racas = await Raca.getByTipo(tipoId);
-            res.json(racas);
-        } catch (error) {
-            console.error("Erro ao buscar raças por tipo:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
-        }
-    }
+            const { tipo_raca } = req.body;
 
-    async createRaca(req, res) {
-        try {
-            const { nome, fk_idtipo } = req.body;
+            if (!tipo_raca || tipo_raca.trim() === '') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'O tipo da raça é obrigatório'
+                });
+            }
+
+            const result = await RacaDb.insert({ tipo_raca });
             
-            if (!nome || !fk_idtipo) {
-                return res.status(400).json({ error: "Nome e tipo são obrigatórios" });
-            }
+            res.status(201).json({
+                success: true,
+                message: 'Raça criada com sucesso',
+                data: { id: result.insertId }
+            });
 
-            const raca = await Raca.create(nome, fk_idtipo);
-            res.status(201).json(raca);
         } catch (error) {
-            console.error("Erro ao criar raça:", error);
-            if (error.message === "Tipo de animal não encontrado") {
-                return res.status(400).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao criar raça:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async updateRaca(req, res) {
-        try {
-            const { id } = req.params;
-            const { nome, fk_idtipo } = req.body;
-            
-            const raca = await Raca.update(id, nome, fk_idtipo);
-            res.json(raca);
-        } catch (error) {
-            console.error("Erro ao atualizar raça:", error);
-            if (error.message === "Raça não encontrada") {
-                return res.status(404).json({ error: error.message });
-            }
-            if (error.message === "Tipo de animal não encontrado" || error.message === "Nenhum campo para atualizar") {
-                return res.status(400).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
-        }
-    }
-
-    async deleteRaca(req, res) {
+    static async update(req, res) {
         try {
             const { id } = req.params;
-            
-            const result = await Raca.delete(id);
-            res.json(result);
+            const { tipo_raca } = req.body;
+
+            if (!tipo_raca || tipo_raca.trim() === '') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'O tipo da raça é obrigatório'
+                });
+            }
+
+            const existingRaca = await RacaDb.selectById(id);
+            if (!existingRaca) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Raça não encontrada'
+                });
+            }
+
+            await RacaDb.update({ idraca: id, tipo_raca });
+
+            res.status(200).json({
+                success: true,
+                message: 'Raça atualizada com sucesso'
+            });
+
         } catch (error) {
-            console.error("Erro ao deletar raça:", error);
-            if (error.message === "Raça não encontrada") {
-                return res.status(404).json({ error: error.message });
+            console.error('Erro ao atualizar raça:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    static async delete(req, res) {
+        try {
+            const { id } = req.params;
+
+            const existingRaca = await RacaDb.selectById(id);
+            if (!existingRaca) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Raça não encontrada'
+                });
             }
-            if (error.message === "Não é possível deletar raça que está sendo usada por animais") {
-                return res.status(400).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
+
+            await RacaDb.delete(id);
+
+            res.status(200).json({
+                success: true,
+                message: 'Raça deletada com sucesso'
+            });
+
+        } catch (error) {
+            console.error('Erro ao deletar raça:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 }
 
-module.exports = new RacaController();
-
+module.exports = RacaController;

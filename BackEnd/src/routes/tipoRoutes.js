@@ -1,12 +1,13 @@
-const StatusDb = require('../db/statusDb');
-const Status = require('../models/status');
+const express = require('express');
+const router = express.Router();
+const TipoDb = require('../db/tipoDb');
+const Tipo = require('../models/tipo');
 
-class StatusController {
-
-    // Criar novo status
+// Controller simples inline para Tipo (entidade simples)
+class TipoController {
     static async create(req, res) {
         try {
-            const errors = Status.validate(req.body);
+            const errors = Tipo.validate(req.body);
             if (errors.length > 0) {
                 return res.status(400).json({
                     success: false,
@@ -15,16 +16,16 @@ class StatusController {
                 });
             }
 
-            const result = await StatusDb.insert(req.body);
+            const result = await TipoDb.insert(req.body);
             
             res.status(201).json({
                 success: true,
-                message: 'Status criado com sucesso',
+                message: 'Tipo criado com sucesso',
                 data: { id: result.insertId }
             });
 
         } catch (error) {
-            console.error('Erro ao criar status:', error);
+            console.error('Erro ao criar tipo:', error);
             res.status(500).json({
                 success: false,
                 message: 'Erro interno do servidor'
@@ -32,23 +33,22 @@ class StatusController {
         }
     }
 
-    // Listar todos os status
     static async getAll(req, res) {
         try {
-            const statusList = await StatusDb.selectAll();
+            const tipos = await TipoDb.selectAll();
             
-            const statusObjects = statusList.map(status => {
-                const statusObj = Status.fromDatabase(status);
-                return statusObj.toObject();
+            const tiposObjects = tipos.map(tipo => {
+                const tipoObj = Tipo.fromDatabase(tipo);
+                return tipoObj.toObject();
             });
 
             res.status(200).json({
                 success: true,
-                data: statusObjects
+                data: tiposObjects
             });
 
         } catch (error) {
-            console.error('Erro ao buscar status:', error);
+            console.error('Erro ao buscar tipos:', error);
             res.status(500).json({
                 success: false,
                 message: 'Erro interno do servidor'
@@ -56,27 +56,26 @@ class StatusController {
         }
     }
 
-    // Buscar status por ID
     static async getById(req, res) {
         try {
             const { id } = req.params;
-            const status = await StatusDb.selectById(id);
+            const tipo = await TipoDb.selectById(id);
 
-            if (!status) {
+            if (!tipo) {
                 return res.status(404).json({
                     success: false,
-                    message: 'Status não encontrado'
+                    message: 'Tipo não encontrado'
                 });
             }
 
-            const statusObj = Status.fromDatabase(status);
+            const tipoObj = Tipo.fromDatabase(tipo);
             res.status(200).json({
                 success: true,
-                data: statusObj.toObject()
+                data: tipoObj.toObject()
             });
 
         } catch (error) {
-            console.error('Erro ao buscar status:', error);
+            console.error('Erro ao buscar tipo:', error);
             res.status(500).json({
                 success: false,
                 message: 'Erro interno do servidor'
@@ -84,13 +83,12 @@ class StatusController {
         }
     }
 
-    // Atualizar status
     static async update(req, res) {
         try {
             const { id } = req.params;
-            const statusData = { ...req.body, idstatus: id };
+            const tipoData = { ...req.body, idtipo_animal: id };
 
-            const errors = Status.validate(statusData);
+            const errors = Tipo.validate(tipoData);
             if (errors.length > 0) {
                 return res.status(400).json({
                     success: false,
@@ -99,24 +97,23 @@ class StatusController {
                 });
             }
 
-            // Verificar se status existe
-            const existingStatus = await StatusDb.selectById(id);
-            if (!existingStatus) {
+            const existingTipo = await TipoDb.selectById(id);
+            if (!existingTipo) {
                 return res.status(404).json({
                     success: false,
-                    message: 'Status não encontrado'
+                    message: 'Tipo não encontrado'
                 });
             }
 
-            await StatusDb.update(statusData);
+            await TipoDb.update(tipoData);
 
             res.status(200).json({
                 success: true,
-                message: 'Status atualizado com sucesso'
+                message: 'Tipo atualizado com sucesso'
             });
 
         } catch (error) {
-            console.error('Erro ao atualizar status:', error);
+            console.error('Erro ao atualizar tipo:', error);
             res.status(500).json({
                 success: false,
                 message: 'Erro interno do servidor'
@@ -124,29 +121,27 @@ class StatusController {
         }
     }
 
-    // Deletar status
     static async delete(req, res) {
         try {
             const { id } = req.params;
 
-            // Verificar se status existe
-            const existingStatus = await StatusDb.selectById(id);
-            if (!existingStatus) {
+            const existingTipo = await TipoDb.selectById(id);
+            if (!existingTipo) {
                 return res.status(404).json({
                     success: false,
-                    message: 'Status não encontrado'
+                    message: 'Tipo não encontrado'
                 });
             }
 
-            await StatusDb.delete(id);
+            await TipoDb.delete(id);
 
             res.status(200).json({
                 success: true,
-                message: 'Status deletado com sucesso'
+                message: 'Tipo deletado com sucesso'
             });
 
         } catch (error) {
-            console.error('Erro ao deletar status:', error);
+            console.error('Erro ao deletar tipo:', error);
             res.status(500).json({
                 success: false,
                 message: 'Erro interno do servidor'
@@ -155,5 +150,12 @@ class StatusController {
     }
 }
 
-module.exports = StatusController;
+// Rotas para tipos de animal
+router.post('/', TipoController.create);           // POST /tipos - Criar tipo
+router.get('/', TipoController.getAll);            // GET /tipos - Listar todos os tipos
+router.get('/:id', TipoController.getById);        // GET /tipos/:id - Buscar tipo por ID
+router.put('/:id', TipoController.update);         // PUT /tipos/:id - Atualizar tipo
+router.delete('/:id', TipoController.delete);      // DELETE /tipos/:id - Deletar tipo
+
+module.exports = router;
 

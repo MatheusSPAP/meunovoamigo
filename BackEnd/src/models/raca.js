@@ -1,97 +1,54 @@
-const db = require("../db/dbConfig");
-
 class Raca {
-    static async getAll() {
-        const query = `
-            SELECT 
-                r.idraca, r.nome, r.fk_idtipo,
-                t.nome as tipo_nome
-            FROM raca r
-            LEFT JOIN tipo_animal t ON r.fk_idtipo = t.idtipo
-        `;
-        return await db.executeQuery(query);
+    constructor(idraca, tipo_idtipo_animal, tipo_raca) {
+        this.idraca = idraca;
+        this.tipo_idtipo_animal = tipo_idtipo_animal;
+        this.tipo_raca = tipo_raca;
     }
 
-    static async getById(id) {
-        const query = `
-            SELECT 
-                r.idraca, r.nome, r.fk_idtipo,
-                t.nome as tipo_nome
-            FROM raca r
-            LEFT JOIN tipo_animal t ON r.fk_idtipo = t.idtipo
-            WHERE r.idraca = ?
-        `;
-        const raca = await db.executeQuery(query, [id]);
-        return raca.length > 0 ? raca[0] : null;
+    // Método para validar dados obrigatórios
+    static validate(data) {
+        const errors = [];
+
+        if (!data.idraca) {
+            errors.push('ID da raça é obrigatório');
+        }
+
+        if (!data.tipo_idtipo_animal) {
+            errors.push('ID do tipo de animal é obrigatório');
+        }
+
+        if (!data.tipo_raca || data.tipo_raca.trim() === '') {
+            errors.push('Tipo da raça é obrigatório');
+        }
+
+        // Validação dos valores permitidos para tipo_raca
+        const racasPermitidas = [
+            'Vira-lata (cão)', 'Labrador', 'Poodle', 'Bulldog', 'Pinscher',
+            'Vira-lata (gato)', 'Siamês', 'Persa', 'Outra'
+        ];
+        if (data.tipo_raca && !racasPermitidas.includes(data.tipo_raca)) {
+            errors.push('Tipo da raça deve ser um dos valores permitidos');
+        }
+
+        return errors;
     }
 
-    static async getByTipo(tipoId) {
-        const query = `
-            SELECT 
-                r.idraca, r.nome, r.fk_idtipo,
-                t.nome as tipo_nome
-            FROM raca r
-            LEFT JOIN tipo_animal t ON r.fk_idtipo = t.idtipo
-            WHERE r.fk_idtipo = ?
-        `;
-        return await db.executeQuery(query, [tipoId]);
+    // Método para criar instância a partir de dados do banco
+    static fromDatabase(row) {
+        return new Raca(
+            row.idraca,
+            row.tipo_idtipo_animal,
+            row.tipo_raca
+        );
     }
 
-    static async create(nome, fk_idtipo) {
-        const tipoCheck = await db.executeQuery('SELECT idtipo FROM tipo_animal WHERE idtipo = ?', [fk_idtipo]);
-        if (tipoCheck.length === 0) {
-            throw new Error('Tipo de animal não encontrado');
-        }
-
-        const insertQuery = 'INSERT INTO raca (nome, fk_idtipo) VALUES (?, ?)';
-        const result = await db.executeQuery(insertQuery, [nome, fk_idtipo]);
-        return this.getById(result.insertId);
-    }
-
-    static async update(id, nome, fk_idtipo) {
-        const checkQuery = 'SELECT idraca FROM raca WHERE idraca = ?';
-        const existingRaca = await db.executeQuery(checkQuery, [id]);
-        if (existingRaca.length === 0) {
-            throw new Error('Raça não encontrada');
-        }
-
-        if (fk_idtipo) {
-            const tipoCheck = await db.executeQuery('SELECT idtipo FROM tipo_animal WHERE idtipo = ?', [fk_idtipo]);
-            if (tipoCheck.length === 0) {
-                throw new Error('Tipo de animal não encontrado');
-            }
-        }
-
-        const updates = [];
-        const values = [];
-        if (nome) { updates.push('nome = ?'); values.push(nome); }
-        if (fk_idtipo) { updates.push('fk_idtipo = ?'); values.push(fk_idtipo); }
-
-        if (updates.length === 0) {
-            throw new Error('Nenhum campo para atualizar');
-        }
-
-        values.push(id);
-        const updateQuery = `UPDATE raca SET ${updates.join(', ')} WHERE idraca = ?`;
-        await db.executeQuery(updateQuery, values);
-        return this.getById(id);
-    }
-
-    static async delete(id) {
-        const checkQuery = 'SELECT idraca FROM raca WHERE idraca = ?';
-        const existingRaca = await db.executeQuery(checkQuery, [id]);
-        if (existingRaca.length === 0) {
-            throw new Error('Raça não encontrada');
-        }
-
-        const animalCheck = await db.executeQuery('SELECT idAnimal FROM animal WHERE fk_idraca = ?', [id]);
-        if (animalCheck.length > 0) {
-            throw new Error('Não é possível deletar raça que está sendo usada por animais');
-        }
-
-        const deleteQuery = 'DELETE FROM raca WHERE idraca = ?';
-        await db.executeQuery(deleteQuery, [id]);
-        return { message: 'Raça deletada com sucesso' };
+    // Método para converter para objeto simples
+    toObject() {
+        return {
+            idraca: this.idraca,
+            tipo_idtipo_animal: this.tipo_idtipo_animal,
+            tipo_raca: this.tipo_raca
+        };
     }
 }
 
