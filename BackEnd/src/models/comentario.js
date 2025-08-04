@@ -1,7 +1,7 @@
 const db = require("../db/dbConfig");
 
 class Comentario {
-    static async getByPostagem(postagem_id) {
+    static async getByPublicacao(publicacao_id) {
         const query = `
             SELECT 
                 c.id_comentario, c.fk_idcomunidade, c.fk_idusuario,
@@ -12,13 +12,13 @@ class Comentario {
             WHERE c.fk_idcomunidade = ?
             ORDER BY c.data ASC
         `;
-        return await db.executeQuery(query, [postagem_id]);
+        return await db.executeQuery(query, [publicacao_id]);
     }
 
     static async create(fk_idcomunidade, fk_idusuario, mensagem) {
-        const postagemCheck = await db.executeQuery('SELECT idcomunidade FROM postagem WHERE idcomunidade = ?', [fk_idcomunidade]);
-        if (postagemCheck.length === 0) {
-            throw new Error('Postagem não encontrada');
+        const publicacaoCheck = await db.executeQuery('SELECT idcomunidade FROM publicacao WHERE idcomunidade = ?', [fk_idcomunidade]);
+        if (publicacaoCheck.length === 0) {
+            throw new Error('Publicação não encontrada');
         }
 
         const userCheck = await db.executeQuery('SELECT idusuario FROM usuario WHERE idusuario = ?', [fk_idusuario]);
@@ -75,6 +75,22 @@ class Comentario {
         `, [id]);
         
         return updatedComentario[0];
+    }
+
+    static async getByUsuario(usuarioId) {
+        const query = `
+            SELECT 
+                c.id_comentario, c.fk_idcomunidade, c.fk_idusuario,
+                c.mensagem, c.data,
+                u.nome as autor_nome,
+                p.titulo as publicacao_titulo
+            FROM comentario c
+            LEFT JOIN usuario u ON c.fk_idusuario = u.idusuario
+            LEFT JOIN publicacao p ON c.fk_idcomunidade = p.idcomunidade
+            WHERE c.fk_idusuario = ?
+            ORDER BY c.data DESC
+        `;
+        return await db.executeQuery(query, [usuarioId]);
     }
 }
 

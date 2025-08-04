@@ -2,12 +2,12 @@ const db = require("../db/dbConfig");
 
 class Status {
     static async getAll() {
-        const query = 'SELECT * FROM status';
+        const query = 'SELECT idstatus, tipo FROM status';
         return await db.executeQuery(query);
     }
 
     static async getById(id) {
-        const query = 'SELECT * FROM status WHERE idstatus = ?';
+        const query = 'SELECT idstatus, tipo FROM status WHERE idstatus = ?';
         const status = await db.executeQuery(query, [id]);
         return status.length > 0 ? status[0] : null;
     }
