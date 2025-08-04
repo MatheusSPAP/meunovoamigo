@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 // Importar configuração do banco de dados
-const { testConnection } = require('./src/db/dbMysqlConfig');
+const { testConnection } = require('./src/db/dbConfig');
 
 // Importar rotas
 const usuarioRoutes = require('./src/routes/usuarioRoutes');
@@ -20,7 +20,7 @@ const midiaRoutes = require('./src/routes/midiaRoutes');
 const racaRoutes = require('./src/routes/racaRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 // Middlewares
 app.use(cors({

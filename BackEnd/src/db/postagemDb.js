@@ -1,4 +1,4 @@
-const db = require('./dbMysqlConfig');
+const db = require('./dbConfig');
 
 class PostagemDb {
 
