@@ -1,0 +1,87 @@
+<div class="home-container">
+  <h1>Bem-vindo ao Meu Novo Amigo!</h1>
+  <p>Sua plataforma para encontrar e adotar seu novo melhor amigo.</p>
+
+  <div class="form-toggle">
+    <button (click)="toggleForm()" [class.active]="showLoginForm">Login</button>
+    <button (click)="toggleForm()" [class.active]="!showLoginForm">Registrar</button>
+  </div>
+
+  <div *ngIf="showLoginForm" class="form-section">
+    <h2>Login</h2>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmitLogin()">
+      <div>
+        <label for="loginEmail">Email:</label>
+        <input type="email" id="loginEmail" formControlName="email">
+        <div *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)">
+          <div *ngIf="loginForm.get('email')?.errors?.['required']">Email é obrigatório.</div>
+          <div *ngIf="loginForm.get('email')?.errors?.['email']">Formato de email inválido.</div>
+        </div>
+      </div>
+      <div>
+        <label for="loginSenha">Senha:</label>
+        <input type="password" id="loginSenha" formControlName="senha">
+        <div *ngIf="loginForm.get('senha')?.invalid && (loginForm.get('senha')?.dirty || loginForm.get('senha')?.touched)">
+          Senha é obrigatória.
+        </div>
+      </div>
+      <button type="submit" [disabled]="!loginForm.valid">Entrar</button>
+      <div *ngIf="loginErrorMessage" class="error-message">
+        {{ loginErrorMessage }}
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="!showLoginForm" class="form-section">
+    <h2>Registro de Usuário</h2>
+    <form [formGroup]="registroForm" (ngSubmit)="onSubmitRegistro()">
+      <div>
+        <label for="registroNome">Nome:</label>
+        <input type="text" id="registroNome" formControlName="nome">
+        <div *ngIf="registroForm.get('nome')?.invalid && (registroForm.get('nome')?.dirty || registroForm.get('nome')?.touched)">
+          Nome é obrigatório.
+        </div>
+      </div>
+      <div>
+        <label for="registroEmail">Email:</label>
+        <input type="email" id="registroEmail" formControlName="email">
+        <div *ngIf="registroForm.get('email')?.invalid && (registroForm.get('email')?.dirty || registroForm.get('email')?.touched)">
+          <div *ngIf="registroForm.get('email')?.errors?.['required']">Email é obrigatório.</div>
+          <div *ngIf="registroForm.get('email')?.errors?.['email']">Formato de email inválido.</div>
+        </div>
+      </div>
+      <div>
+        <label for="registroSenha">Senha:</label>
+        <input type="password" id="registroSenha" formControlName="senha">
+        <div *ngIf="registroForm.get('senha')?.invalid && (registroForm.get('senha')?.dirty || registroForm.get('senha')?.touched)">
+          Senha é obrigatória.
+        </div>
+      </div>
+      <div>
+        <label for="registroTelefone">Telefone:</label>
+        <input type="text" id="registroTelefone" formControlName="telefone">
+        <div *ngIf="registroForm.get('telefone')?.invalid && (registroForm.get('telefone')?.dirty || registroForm.get('telefone')?.touched)">
+          Telefone é obrigatório.
+        </div>
+      </div>
+      <div>
+        <label for="registroCidade">Cidade:</label>
+        <input type="text" id="registroCidade" formControlName="cidade">
+        <div *ngIf="registroForm.get('cidade')?.invalid && (registroForm.get('cidade')?.dirty || registroForm.get('cidade')?.touched)">
+          Cidade é obrigatória.
+        </div>
+      </div>
+      <div>
+        <label for="registroEndereco">Endereço:</label>
+        <input type="text" id="registroEndereco" formControlName="endereco">
+        <div *ngIf="registroForm.get('endereco')?.invalid && (registroForm.get('endereco')?.dirty || registroForm.get('endereco')?.touched)">
+          Endereço é obrigatório.
+        </div>
+      </div>
+      <button type="submit" [disabled]="!registroForm.valid">Registrar</button>
+      <div *ngIf="registroErrorMessage" class="error-message">
+        {{ registroErrorMessage }}
+      </div>
+    </form>
+  </div>
+</div>

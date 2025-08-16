@@ -1,0 +1,22 @@
+nav {
+  background-color: #f8f8f8;
+  padding: 10px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+nav a:hover {
+  background-color: #e0e0e0; /* Light gray background on hover */
+  color: #000;
+}

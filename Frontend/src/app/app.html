@@ -1,0 +1,12 @@
+<nav>
+  <a [routerLink]="isLoggedIn() ? '/dashboard' : '/'">Home</a>
+  <a routerLink="/animais" *ngIf="isLoggedIn()">Animais</a>
+  <a routerLink="/cadastrar-animal" *ngIf="isLoggedIn()">Cadastrar Animal</a>
+  <a routerLink="/postagens" *ngIf="isLoggedIn()">Postagens</a>
+  <a routerLink="/criar-postagem" *ngIf="isLoggedIn()">Criar Postagem</a>
+  <a routerLink="/eventos" *ngIf="isLoggedIn()">Eventos</a>
+  <a routerLink="/interesses-adocao" *ngIf="isLoggedIn()">Interesses de Adoção</a>
+  <a routerLink="/perfil" *ngIf="isLoggedIn()">Perfil</a>
+  <a (click)="logout()" *ngIf="isLoggedIn()">Sair</a>
+</nav>
+<router-outlet></router-outlet>

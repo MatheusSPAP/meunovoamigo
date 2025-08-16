@@ -1,0 +1,42 @@
+<div class="interesse-adocao-container">
+  <h2>Meus Interesses de Adoção</h2>
+
+  <div *ngIf="errorMessage" class="error-message">
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <div class="section">
+    <h3>Interesses que Manifestei</h3>
+    <div *ngIf="interessesManifestados.length > 0" class="interesse-adocao-grid">
+      <div *ngFor="let interesse of interessesManifestados" class="interesse-adocao-card">
+        <p><strong>Mensagem:</strong> {{ interesse.mensagem }}</p>
+        <p><strong>Status:</strong> <span [ngClass]="{'status-aguardando': interesse.interesse_status === 'Aguardando', 'status-aprovado': interesse.interesse_status === 'Aprovado', 'status-recusado': interesse.interesse_status === 'Recusado'}">{{ interesse.interesse_status }}</span></p>
+        <p><strong>Data:</strong> {{ interesse.data_interesse | date:'dd/MM/yyyy' }}</p>
+        <p><strong>ID Animal:</strong> {{ interesse.animal_idAnimal }}</p>
+      </div>
+    </div>
+    <div *ngIf="interessesManifestados.length === 0 && !errorMessage">
+      <p>Você ainda não manifestou interesse em nenhum animal.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Interesses Recebidos (para meus animais)</h3>
+    <div *ngIf="interessesRecebidos.length > 0" class="interesse-adocao-grid">
+      <div *ngFor="let interesse of interessesRecebidos" class="interesse-adocao-card">
+        <p><strong>Mensagem:</strong> {{ interesse.mensagem }}</p>
+        <p><strong>Status:</strong> <span [ngClass]="{'status-aguardando': interesse.interesse_status === 'Aguardando', 'status-aprovado': interesse.interesse_status === 'Aprovado', 'status-recusado': interesse.interesse_status === 'Recusado'}">{{ interesse.interesse_status }}</span></p>
+        <p><strong>Data:</strong> {{ interesse.data_interesse | date:'dd/MM/yyyy' }}</p>
+        <p><strong>ID Usuário Interessado:</strong> {{ interesse.usuario_idusuario }}</p>
+        <p><strong>ID Animal:</strong> {{ interesse.animal_idAnimal }}</p>
+        <div class="actions" *ngIf="interesse.interesse_status === 'Aguardando'">
+          <button (click)="aprovarInteresse(interesse.idinteresse_adocao, interesse.animal_idAnimal)" class="btn-aprovar">Aprovar</button>
+          <button (click)="recusarInteresse(interesse.idinteresse_adocao)" class="btn-recusar">Recusar</button>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="interessesRecebidos.length === 0 && !errorMessage">
+      <p>Nenhum interesse recebido para seus animais ainda.</p>
+    </div>
+  </div>
+</div>

@@ -11,7 +11,7 @@ class PostagemDb {
         const animal_idAnimal = model.animal_idAnimal;
         const usuario_idusuario = model.usuario_idusuario;
 
-        const query = 'INSERT INTO comunidade (descricao, data_postagem, titulo, animal_idAnimal, usuario_idusuario) VALUES (?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO postagem (descricao, data_postagem, titulo, animal_idAnimal, usuario_idusuario) VALUES (?, ?, ?, ?, ?)';
 
         try {
             const [result] = await conn.execute(query, [descricao, data_postagem, titulo, animal_idAnimal, usuario_idusuario]);
@@ -27,7 +27,7 @@ class PostagemDb {
         const conn = await db.connect();
 
         const query = `SELECT p.*, u.nome as nome_usuario, a.nome as nome_animal, a.foto as foto_animal
-                       FROM comunidade p
+                       FROM postagem p
                        LEFT JOIN usuario u ON p.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON p.animal_idAnimal = a.idAnimal
                        ORDER BY p.data_postagem DESC`;
@@ -46,7 +46,7 @@ class PostagemDb {
         const conn = await db.connect();
 
         const query = `SELECT p.*, u.nome as nome_usuario, a.nome as nome_animal, a.foto as foto_animal
-                       FROM comunidade p
+                       FROM postagem p
                        LEFT JOIN usuario u ON p.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON p.animal_idAnimal = a.idAnimal
                        WHERE p.idcomunidade = ?`;
@@ -65,7 +65,7 @@ class PostagemDb {
         const conn = await db.connect();
 
         const query = `SELECT p.*, u.nome as nome_usuario, a.nome as nome_animal, a.foto as foto_animal
-                       FROM comunidade p
+                       FROM postagem p
                        LEFT JOIN usuario u ON p.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON p.animal_idAnimal = a.idAnimal
                        WHERE p.usuario_idusuario = ?
@@ -85,7 +85,7 @@ class PostagemDb {
         const conn = await db.connect();
 
         const query = `SELECT p.*, u.nome as nome_usuario, a.nome as nome_animal, a.foto as foto_animal
-                       FROM comunidade p
+                       FROM postagem p
                        LEFT JOIN usuario u ON p.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON p.animal_idAnimal = a.idAnimal
                        WHERE p.animal_idAnimal = ?
@@ -108,7 +108,7 @@ class PostagemDb {
         const descricao = model.descricao;
         const titulo = model.titulo;
 
-        const query = 'UPDATE comunidade SET descricao = ?, titulo = ? WHERE idcomunidade = ?';
+        const query = 'UPDATE postagem SET descricao = ?, titulo = ? WHERE idcomunidade = ?';
 
         try {
             const [result] = await conn.execute(query, [descricao, titulo, idcomunidade]);
@@ -123,7 +123,7 @@ class PostagemDb {
     static async delete(id) {
         const conn = await db.connect();
 
-        const query = 'DELETE FROM comunidade WHERE idcomunidade = ?';
+        const query = 'DELETE FROM postagem WHERE idcomunidade = ?';
 
         try {
             const [result] = await conn.execute(query, [id]);

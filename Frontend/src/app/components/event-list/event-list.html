@@ -1,0 +1,8 @@
+<div class="event-grid">
+  <div *ngFor="let evento of eventos" class="event-card">
+    <h3>{{ evento.titulo }}</h3>
+    <p><strong>Data:</strong> {{ evento.data | date:'dd/MM/yyyy' }}</p>
+    <p><strong>Endereço:</strong> {{ evento.endereco }}</p>
+    <p>{{ evento.descricao }}</p>
+  </div>
+</div>

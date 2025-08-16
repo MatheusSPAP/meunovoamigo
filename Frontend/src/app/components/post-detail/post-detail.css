@@ -1,0 +1,117 @@
+.post-detail-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.post-detail-container h2 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.post-meta {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.post-description {
+  font-size: 1.1em;
+  color: #444;
+  line-height: 1.6;
+  max-width: 800px;
+  text-align: left;
+}
+
+.comments-section {
+  margin-top: 40px;
+  width: 100%;
+  max-width: 800px;
+  text-align: left;
+}
+
+.comments-section h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.comment-card {
+  border: 1px solid #eee;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.comment-meta {
+  font-size: 0.85em;
+  color: #888;
+  margin-bottom: 5px;
+}
+
+.comment-message {
+  font-size: 1em;
+  color: #333;
+}
+
+.comment-form-section {
+  margin-top: 30px;
+  border: 1px solid #eee;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.comment-form-section h4 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.comment-form-section label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.comment-form-section textarea {
+  width: calc(100% - 22px);
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.comment-form-section button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  margin-top: 15px;
+}
+
+.comment-form-section button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.success-message {
+  color: green;
+  margin-top: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.error-message {
+  color: red;
+  margin-top: 15px;
+  text-align: center;
+  font-weight: bold;
+}
