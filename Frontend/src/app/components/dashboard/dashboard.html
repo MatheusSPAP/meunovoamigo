@@ -1,5 +1,36 @@
 <div class="dashboard-container">
-  <h2>Bem-vindo ao seu Dashboard!</h2>
+  <h2>Bem-vindo(a){{ currentUserName ? ', ' + currentUserName : '' }} ao seu Dashboard!</h2>
   <p>Aqui você encontrará um resumo das informações importantes.</p>
-  <!-- Future content like recent animals, upcoming events, etc. -->
+
+  <div *ngIf="errorMessage" class="error-message">
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <div class="dashboard-section">
+    <h3>Meus Animais</h3>
+    <div *ngIf="userAnimals.length === 0">
+      <p>Você ainda não cadastrou nenhum animal.</p>
+      <button routerLink="/cadastrar-animal" class="btn-primary">+ Cadastrar um novo animal</button>
+    </div>
+    <div *ngIf="userAnimals.length > 0">
+      <div *ngIf="pendingInterestsCount > 0" class="alert-card">
+        <p>Você tem <strong>{{ pendingInterestsCount }}</strong> novo(s) interesse(s) de adoção aguardando sua revisão!</p>
+        <button routerLink="/interesses-adocao" class="btn-secondary">Ver Interesses</button>
+      </div>
+
+      <div class="animal-list-dashboard">
+        <div *ngFor="let animal of userAnimals" class="animal-card-dashboard">
+          <img [src]="animal.foto" [alt]="animal.nome" class="animal-photo-dashboard">
+          <div class="animal-details-dashboard">
+            <h4>{{ animal.nome }}</h4>
+            <p>Status: {{ animal.status_tipo }}</p>
+            <a [routerLink]="['/animais', animal.idAnimal]" class="btn-link">Ver Detalhes</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outras seções futuras podem ser adicionadas aqui -->
+
 </div>

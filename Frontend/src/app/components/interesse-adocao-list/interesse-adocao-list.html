@@ -9,10 +9,16 @@
     <h3>Interesses que Manifestei</h3>
     <div *ngIf="interessesManifestados.length > 0" class="interesse-adocao-grid">
       <div *ngFor="let interesse of interessesManifestados" class="interesse-adocao-card">
+        <p><strong>Animal:</strong> {{ interesse.nome_animal }}</p>
         <p><strong>Mensagem:</strong> {{ interesse.mensagem }}</p>
         <p><strong>Status:</strong> <span [ngClass]="{'status-aguardando': interesse.interesse_status === 'Aguardando', 'status-aprovado': interesse.interesse_status === 'Aprovado', 'status-recusado': interesse.interesse_status === 'Recusado'}">{{ interesse.interesse_status }}</span></p>
         <p><strong>Data:</strong> {{ interesse.data_interesse | date:'dd/MM/yyyy' }}</p>
-        <p><strong>ID Animal:</strong> {{ interesse.animal_idAnimal }}</p>
+        <div *ngIf="interesse.dono_email">
+          <h4>Contato do Tutor:</h4>
+          <p><strong>Nome:</strong> {{ interesse.nome_dono_animal }}</p>
+          <p><strong>Email:</strong> {{ interesse.dono_email }}</p>
+          <p><strong>Telefone:</strong> {{ interesse.dono_telefone }}</p>
+        </div>
       </div>
     </div>
     <div *ngIf="interessesManifestados.length === 0 && !errorMessage">

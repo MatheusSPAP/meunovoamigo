@@ -66,7 +66,7 @@ class InteresseAdocaoDb {
         const conn = await db.connect();
 
         const query = `SELECT i.*, u.nome as nome_interessado, a.nome as nome_animal, 
-                       u2.nome as nome_dono_animal
+                       u2.nome as nome_dono_animal, u2.email as dono_email, u2.telefone as dono_telefone
                        FROM interesse_adocao i
                        LEFT JOIN usuario u ON i.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON i.animal_idAnimal = a.idAnimal

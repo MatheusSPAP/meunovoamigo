@@ -5,6 +5,11 @@ export interface InteresseAdocao {
   data_interesse: string; // or Date
   usuario_idusuario: number;
   animal_idAnimal: number;
-  animal_fk_idusuario: number;
-  animal_fk_idstatus: number;
+  
+  // Propriedades adicionadas do JOIN no backend
+  nome_interessado?: string;
+  nome_animal?: string;
+  nome_dono_animal?: string;
+  dono_email?: string;
+  dono_telefone?: string;
 }

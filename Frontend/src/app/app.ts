@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 })
 export class AppComponent implements OnInit, OnDestroy {
   isUserLoggedIn: boolean = false;
+  currentUserName: string | null = null; // Adicionado para armazenar o nome do usuário
   private authSubscription: Subscription | undefined; // Initialize to undefined
 
   constructor(private usuarioService: UsuarioService) { }
@@ -21,6 +22,24 @@ export class AppComponent implements OnInit, OnDestroy {
     this.authSubscription = this.usuarioService.isLoggedIn$.subscribe(
       (loggedIn: boolean) => {
         this.isUserLoggedIn = loggedIn;
+        if (loggedIn) {
+          const userId = localStorage.getItem('currentUserId');
+          if (userId) {
+            this.usuarioService.getUserProfile(Number(userId)).subscribe({
+              next: (response: any) => {
+                if (response.success && response.data && response.data.nome) {
+                  this.currentUserName = response.data.nome;
+                }
+              },
+              error: (error) => {
+                console.error('Erro ao carregar perfil do usuário:', error);
+                this.currentUserName = null; // Limpa o nome em caso de erro
+              }
+            });
+          }
+        } else {
+          this.currentUserName = null; // Limpa o nome se o usuário deslogar
+        }
       }
     );
   }

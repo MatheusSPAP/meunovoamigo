@@ -19,6 +19,8 @@ export class AnimalDetailComponent implements OnInit {
   showInterestForm: boolean = false;
   successMessage: string = '';
   errorMessage: string = '';
+  tutorContact: { nome: string, email: string, telefone: string } | null = null;
+  currentUserId: number | null = null; // Adicionado aqui
 
   constructor(
     private route: ActivatedRoute,
@@ -39,18 +41,25 @@ export class AnimalDetailComponent implements OnInit {
         });
       }
     });
+    // Certifique-se de que currentUserId é definido aqui
+    const userId = localStorage.getItem('currentUserId');
+    if (userId) {
+      this.currentUserId = Number(userId);
+    }
   }
 
   toggleInterestForm(): void {
     this.showInterestForm = !this.showInterestForm;
     this.successMessage = '';
     this.errorMessage = '';
+    this.tutorContact = null;
     this.interesseForm.reset();
   }
 
   onSubmitInteresse(): void {
     this.successMessage = '';
     this.errorMessage = '';
+    this.tutorContact = null;
 
     if (this.interesseForm.valid && this.animal) {
       const userId = localStorage.getItem('currentUserId');
@@ -68,7 +77,8 @@ export class AnimalDetailComponent implements OnInit {
       this.interesseAdocaoService.createInteresseAdocao(interesseData).subscribe({
         next: (response) => {
           console.log('Interesse de adoção registrado com sucesso!', response);
-          this.successMessage = 'Seu interesse foi registrado com sucesso!';
+          this.successMessage = response.message;
+          this.tutorContact = response.data;
           this.showInterestForm = false;
           this.interesseForm.reset();
         },

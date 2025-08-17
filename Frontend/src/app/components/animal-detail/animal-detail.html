@@ -13,7 +13,7 @@
     </div>
   </div>
 
-  <div *ngIf="animal.status_tipo === 'Disponível'">
+  <div *ngIf="animal.status_tipo === 'Disponível' && animal.fk_idusuario !== currentUserId">
     <button (click)="toggleInterestForm()" class="interest-button">Manifestar Interesse</button>
 
     <div *ngIf="showInterestForm" class="interest-form-section">
@@ -36,7 +36,13 @@
   </div>
 
   <div *ngIf="successMessage" class="success-message">
-    {{ successMessage }}
+    <p>{{ successMessage }}</p>
+    <div *ngIf="tutorContact" class="tutor-contact-info">
+      <h4>Dados do Tutor:</h4>
+      <p><strong>Nome:</strong> {{ tutorContact.nome }}</p>
+      <p><strong>Email:</strong> {{ tutorContact.email }}</p>
+      <p><strong>Telefone:</strong> {{ tutorContact.telefone }}</p>
+    </div>
   </div>
   <div *ngIf="errorMessage" class="error-message">
     {{ errorMessage }}
