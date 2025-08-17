@@ -35,7 +35,8 @@ class EventoController {
     // Listar todos os eventos
     static async getAll(req, res) {
         try {
-            const eventos = await EventoDb.selectAll();
+            const { ordenar } = req.query; // Pega o parâmetro de ordenação
+            const eventos = await EventoDb.selectAll(ordenar);
 
             res.status(200).json({
                 success: true,
@@ -82,7 +83,8 @@ class EventoController {
     static async getByUsuario(req, res) {
         try {
             const { idusuario } = req.params;
-            const eventos = await EventoDb.selectByUsuario(idusuario);
+            const { ordenar } = req.query; // Pega o parâmetro de ordenação
+            const eventos = await EventoDb.selectByUsuario(idusuario, ordenar);
 
             res.status(200).json({
                 success: true,
@@ -102,7 +104,8 @@ class EventoController {
     static async getByTipo(req, res) {
         try {
             const { tipo } = req.params;
-            const eventos = await EventoDb.selectByTipo(tipo);
+            const { ordenar } = req.query; // Pega o parâmetro de ordenação
+            const eventos = await EventoDb.selectByTipo(tipo, ordenar);
 
             res.status(200).json({
                 success: true,
@@ -121,16 +124,16 @@ class EventoController {
     // Buscar eventos por período
     static async getByPeriodo(req, res) {
         try {
-            const { dataInicio, dataFim } = req.query;
+            const { dataInicio, dataFim, ordenar } = req.query; // Pega o parâmetro de ordenação
 
-            if (!dataInicio || !dataFim) {
+            if (!dataInicio) { // Data de início é obrigatória
                 return res.status(400).json({
                     success: false,
-                    message: 'Data de início e fim são obrigatórias'
+                    message: 'Data de início é obrigatória para buscar por período.'
                 });
             }
 
-            const eventos = await EventoDb.selectByData(dataInicio, dataFim);
+            const eventos = await EventoDb.selectByData(dataInicio, dataFim, ordenar);
 
             res.status(200).json({
                 success: true,
@@ -161,7 +164,6 @@ class EventoController {
                 });
             }
 
-            // Verificar se evento existe
             const existingEvento = await EventoDb.selectById(id);
             if (!existingEvento) {
                 return res.status(404).json({
@@ -191,7 +193,6 @@ class EventoController {
         try {
             const { id } = req.params;
 
-            // Verificar se evento existe
             const existingEvento = await EventoDb.selectById(id);
             if (!existingEvento) {
                 return res.status(404).json({
@@ -218,4 +219,3 @@ class EventoController {
 }
 
 module.exports = EventoController;
-

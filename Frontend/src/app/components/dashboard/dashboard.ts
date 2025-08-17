@@ -5,7 +5,11 @@ import { InteresseAdocaoService } from '../../services/interesse-adocao.service'
 import { Animal } from '../../models/animal.model';
 import { InteresseAdocao } from '../../models/interesse-adocao.model';
 import { RouterLink } from '@angular/router';
-import { UsuarioService } from '../../usuario.service'; // Importar UsuarioService
+import { UsuarioService } from '../../usuario.service';
+import { PostService } from '../../services/post.service';
+import { Post } from '../../models/post.model';
+import { EventoService } from '../../services/evento.service'; // Adicionado
+import { Evento } from '../../models/evento.model'; // Adicionado
 
 @Component({
   selector: 'app-dashboard',
@@ -16,16 +20,22 @@ import { UsuarioService } from '../../usuario.service'; // Importar UsuarioServi
 })
 export class DashboardComponent implements OnInit {
   currentUserId: number | null = null;
-  currentUserName: string | null = null; // Adicionado para o nome do usuário
+  currentUserName: string | null = null;
   userAnimals: Animal[] = [];
   interessesRecebidos: InteresseAdocao[] = [];
+  interessesManifestados: InteresseAdocao[] = [];
   pendingInterestsCount: number = 0;
+  manifestedInterestsSummary: { aguardando: number, aprovado: number, recusado: number } = { aguardando: 0, aprovado: 0, recusado: 0 };
+  recentPosts: Post[] = [];
+  upcomingEvents: Evento[] = []; // Adicionado
   errorMessage: string = '';
 
   constructor(
     private animalService: AnimalService,
     private interesseAdocaoService: InteresseAdocaoService,
-    private usuarioService: UsuarioService // Injetar UsuarioService
+    private usuarioService: UsuarioService,
+    private postService: PostService,
+    private eventoService: EventoService // Injetado
   ) { }
 
   ngOnInit(): void {
@@ -33,7 +43,7 @@ export class DashboardComponent implements OnInit {
     if (userId) {
       this.currentUserId = Number(userId);
       this.loadDashboardData();
-      this.loadUserName(); // Carregar o nome do usuário
+      this.loadUserName();
     } else {
       this.errorMessage = 'Você precisa estar logado para ver o dashboard.';
     }
@@ -63,6 +73,41 @@ export class DashboardComponent implements OnInit {
           this.errorMessage = 'Erro ao carregar interesses de adoção.';
         }
       });
+
+      // Carregar interesses de adoção manifestados
+      this.interesseAdocaoService.getInteressesByUsuario(this.currentUserId).subscribe({
+        next: (response: any) => {
+          this.interessesManifestados = response.data;
+          this.calculateManifestedInterestsSummary();
+        },
+        error: (error) => {
+          console.error('Erro ao carregar interesses manifestados:', error);
+          this.errorMessage = 'Erro ao carregar seus interesses manifestados.';
+        }
+      });
+
+      // Carregar postagens recentes
+      this.postService.getPosts().subscribe({
+        next: (response: any) => {
+          this.recentPosts = response.data.slice(0, 3); // Limita a 3 postagens
+        },
+        error: (error) => {
+          console.error('Erro ao carregar postagens recentes:', error);
+          this.errorMessage = 'Erro ao carregar postagens recentes.';
+        }
+      });
+
+      // Carregar próximos eventos (Adicionado)
+      const today = new Date().toISOString().slice(0, 10);
+      this.eventoService.getEventosByPeriodo(today, '', 'asc').subscribe({
+        next: (response: any) => {
+          this.upcomingEvents = response.data.slice(0, 3); // Limita a 3 eventos
+        },
+        error: (error) => {
+          console.error('Erro ao carregar próximos eventos:', error);
+          this.errorMessage = 'Erro ao carregar próximos eventos.';
+        }
+      });
     }
   }
 
@@ -86,5 +131,13 @@ export class DashboardComponent implements OnInit {
     this.pendingInterestsCount = this.interessesRecebidos.filter(
       interesse => interesse.interesse_status === 'Aguardando'
     ).length;
+  }
+
+  calculateManifestedInterestsSummary(): void {
+    this.manifestedInterestsSummary = {
+      aguardando: this.interessesManifestados.filter(i => i.interesse_status === 'Aguardando').length,
+      aprovado: this.interessesManifestados.filter(i => i.interesse_status === 'Aprovado').length,
+      recusado: this.interessesManifestados.filter(i => i.interesse_status === 'Recusado').length,
+    };
   }
 }

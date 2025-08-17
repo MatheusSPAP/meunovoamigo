@@ -6,4 +6,5 @@ export interface Evento {
   descricao: string;
   data: string; // or Date
   fk_idusuario: number;
+  nome_usuario?: string; // Adicionado
 }

@@ -109,7 +109,7 @@ class InteresseAdocaoDb {
     static async selectByDonoAnimal(idusuario) {
         const conn = await db.connect();
 
-        const query = `SELECT i.*, u.nome as nome_interessado, a.nome as nome_animal, 
+        const query = `SELECT i.*, u.nome as nome_interessado, u.email as interessado_email, u.telefone as interessado_telefone, a.nome as nome_animal, 
                        u2.nome as nome_dono_animal
                        FROM interesse_adocao i
                        LEFT JOIN usuario u ON i.usuario_idusuario = u.idusuario

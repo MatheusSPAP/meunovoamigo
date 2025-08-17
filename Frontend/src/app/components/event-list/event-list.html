@@ -1,8 +1,57 @@
-<div class="event-grid">
-  <div *ngFor="let evento of eventos" class="event-card">
-    <h3>{{ evento.titulo }}</h3>
-    <p><strong>Data:</strong> {{ evento.data | date:'dd/MM/yyyy' }}</p>
-    <p><strong>Endereço:</strong> {{ evento.endereco }}</p>
-    <p>{{ evento.descricao }}</p>
+<div class="event-list-container">
+  <h2>Eventos de Adoção</h2>
+
+  <div class="filters-section">
+    <form [formGroup]="filterForm" (ngSubmit)="filterEvents()" class="filters-form">
+      <div class="filter-group">
+        <label for="filterTipo">Tipo:</label>
+        <select id="filterTipo" formControlName="tipo">
+          <option value="">Todos</option>
+          <option *ngFor="let tipo of eventTypes" [value]="tipo">{{ tipo }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterPeriodo">Período:</label>
+        <select id="filterPeriodo" formControlName="periodo" (change)="onPeriodoChange()">
+          <option *ngFor="let option of periodoOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterDataInicio">De:</label>
+        <input type="date" id="filterDataInicio" formControlName="dataInicio">
+      </div>
+
+      <div class="filter-group">
+        <label for="filterDataFim">Até:</label>
+        <input type="date" id="filterDataFim" formControlName="dataFim">
+      </div>
+
+      <div class="filter-group">
+        <label for="filterOrdenar">Ordenar:</label>
+        <select id="filterOrdenar" formControlName="ordenar">
+          <option *ngFor="let option of sortOrderOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-filter">Aplicar</button>
+      <button type="button" (click)="resetFilters()" class="btn-filter btn-clear">Limpar</button>
+    </form>
+  </div>
+
+  <div class="event-grid">
+    <div *ngFor="let evento of eventos" class="event-card" [routerLink]="['/eventos', evento.idEvento]">
+      <h3>{{ evento.titulo }}</h3>
+      <p class="event-type">{{ evento.tipo_evento }}</p>
+      <p class="event-date">{{ evento.data | date:'dd/MM/yyyy' }}</p>
+      <p class="event-address">{{ evento.endereco }}</p>
+      <p class="event-description">{{ evento.descricao | slice:0:100 }}...</p>
+      <a [routerLink]="['/eventos', evento.idEvento]" class="btn-link">Ver Detalhes</a>
+    </div>
+  </div>
+
+  <div *ngIf="eventos.length === 0" class="no-events-message">
+    <p>Nenhum evento encontrado com os filtros aplicados.</p>
   </div>
 </div>

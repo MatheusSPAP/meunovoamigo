@@ -18,7 +18,13 @@
       </div>
     </div>
 
-    <a routerLink="/eventos" *ngIf="isLoggedIn()">Eventos</a>
+    <div class="dropdown" *ngIf="isLoggedIn()">
+      <a routerLink="/eventos" class="dropbtn">Eventos</a>
+      <div class="dropdown-content">
+        <a routerLink="/eventos">Ver Eventos</a>
+        <a routerLink="/cadastrar-evento">Cadastrar Evento</a>
+      </div>
+    </div>
   </div>
 
     <div class="nav-group-user" *ngIf="isLoggedIn()">
@@ -33,8 +39,6 @@
   </div>
 
   <div class="nav-group-auth" *ngIf="!isLoggedIn()">
-    <a routerLink="/login">Login</a>
-    <a routerLink="/registro">Registrar</a>
   </div>
 </nav>
 <router-outlet></router-outlet>

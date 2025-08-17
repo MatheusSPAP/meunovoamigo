@@ -11,7 +11,23 @@ export class EventoService {
 
   constructor(private http: HttpClient) { }
 
-  getEventos(): Observable<Evento[]> {
-    return this.http.get<Evento[]>(this.apiUrl);
+  getEventos(ordenar: string = 'asc'): Observable<Evento[]> {
+    return this.http.get<Evento[]>(`${this.apiUrl}?ordenar=${ordenar}`);
+  }
+
+  createEvento(eventoData: Evento): Observable<any> {
+    return this.http.post(this.apiUrl, eventoData);
+  }
+
+  getEventoById(id: number): Observable<Evento> {
+    return this.http.get<Evento>(`${this.apiUrl}/${id}`);
+  }
+
+  getEventosByTipo(tipo: string, ordenar: string = 'asc'): Observable<Evento[]> {
+    return this.http.get<Evento[]>(`${this.apiUrl}/tipo/${tipo}?ordenar=${ordenar}`);
+  }
+
+  getEventosByPeriodo(dataInicio: string, dataFim: string, ordenar: string = 'asc'): Observable<Evento[]> {
+    return this.http.get<Evento[]>(`${this.apiUrl}/periodo?dataInicio=${dataInicio}&dataFim=${dataFim}&ordenar=${ordenar}`);
   }
 }

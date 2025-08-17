@@ -1,34 +1,91 @@
-.post-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+.post-feed-container {
+  display: flex;
+  flex-direction: column;
   gap: 20px;
   padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .post-card {
-  border: 1px solid #ccc;
+  background-color: #fff;
   border-radius: 8px;
-  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  transition: transform 0.2s ease-in-out;
+}
+
+.post-card:hover {
+  transform: translateY(-5px);
+}
+
+.post-meta {
+  display: flex;
   justify-content: space-between;
-}
-
-.post-card h3 {
-  margin-top: 0;
+  align-items: center;
   margin-bottom: 10px;
-  color: #333;
+  font-size: 0.9em;
+  color: #777;
 }
 
-.post-card p {
-  font-size: 0.9em;
-  color: #666;
-  flex-grow: 1;
+.post-author {
+  font-weight: bold;
+  color: #555;
 }
 
 .post-date {
-  font-size: 0.8em;
-  color: #999;
-  text-align: right;
+  font-size: 0.85em;
+}
+
+.post-animal-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  background-color: #f0f8ff;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #e0f2ff;
+}
+
+.animal-photo-feed {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #add8e6;
+}
+
+.post-animal-info p {
+  margin: 0;
+  font-size: 0.95em;
+  color: #333;
+}
+
+.post-content h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 1.5em;
+}
+
+.post-content p {
+  font-size: 1em;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.btn-link {
+  display: inline-block;
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
   margin-top: 10px;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
 }

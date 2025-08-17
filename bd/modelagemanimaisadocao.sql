@@ -169,7 +169,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `modelagemanimaisadocao`.`evento` (
   `idEvento` INT NOT NULL AUTO_INCREMENT,
   `titulo` VARCHAR(255) NOT NULL,
-  `tipo_evento` VARCHAR(45) NOT NULL,
+  `tipo_evento` ENUM('Feira de Adoção', 'Campanha de Vacinação', 'Mutirão de Castração', 'Outro') NOT NULL,
   `endereco` VARCHAR(45) NOT NULL,
   `descricao` VARCHAR(255) NOT NULL,
   `data` DATE NOT NULL,

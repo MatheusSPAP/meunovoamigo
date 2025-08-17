@@ -1,18 +1,21 @@
 <div *ngIf="post" class="post-detail-container">
-  <h2>{{ post.titulo }}</h2>
-  <p class="post-meta">Por {{ post.nome_usuario || 'Usuário desconhecido' }} em {{ post.data_postagem | date:'dd/MM/yyyy' }}</p>
+  <div class="post-detail-header">
+    <h2>{{ post.titulo }}</h2>
+    <p class="post-meta">Por {{ post.nome_usuario || 'Usuário desconhecido' }} em {{ post.data_postagem | date:'dd/MM/yyyy' }}</p>
+  </div>
 
   <div *ngIf="post.animal_idAnimal" class="animal-info-card">
     <img *ngIf="post.foto_animal" [src]="post.foto_animal" [alt]="post.nome_animal" class="animal-avatar">
     <p>Esta postagem é sobre: <strong>{{ post.nome_animal }}</strong></p>
   </div>
 
-  <p class="post-description">{{ post.descricao }}</p>
-  <!-- You can add more details here like animal info if needed -->
+  <div class="post-content-body">
+    <p class="post-description">{{ post.descricao }}</p>
+  </div>
 
   <div class="comments-section">
     <h3>Comentários</h3>
-    <div *ngIf="comentarios.length === 0">
+    <div *ngIf="comentarios.length === 0" class="no-comments-message">
       <p>Nenhum comentário ainda. Seja o primeiro a comentar!</p>
     </div>
     <div *ngFor="let comentario of comentarios" class="comment-card">
@@ -23,10 +26,10 @@
     <div class="comment-form-section">
       <h4>Adicionar Comentário</h4>
       <form [formGroup]="comentarioForm" (ngSubmit)="onSubmitComentario()">
-        <div>
+        <div class="form-group">
           <label for="comentarioMensagem">Sua mensagem:</label>
           <textarea id="comentarioMensagem" formControlName="mensagem" rows="3"></textarea>
-          <div *ngIf="comentarioForm.get('mensagem')?.invalid && (comentarioForm.get('mensagem')?.dirty || comentarioForm.get('mensagem')?.touched)">
+          <div *ngIf="comentarioForm.get('mensagem')?.invalid && (comentarioForm.get('mensagem')?.dirty || comentarioForm.get('mensagem')?.touched)" class="error-text">
             Mensagem é obrigatória e deve ter no máximo 255 caracteres.
           </div>
         </div>
@@ -42,6 +45,6 @@
     </div>
   </div>
 </div>
-<div *ngIf="!post">
+<div *ngIf="!post" class="loading-message">
   <p>Postagem não encontrada ou carregando...</p>
 </div>

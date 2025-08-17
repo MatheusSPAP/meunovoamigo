@@ -21,6 +21,11 @@ class Evento {
             errors.push('Tipo do evento é obrigatório');
         }
 
+        const tiposPermitidos = ['Feira de Adoção', 'Campanha de Vacinação', 'Mutirão de Castração', 'Outro'];
+        if (data.tipo_evento && !tiposPermitidos.includes(data.tipo_evento)) {
+            errors.push('Tipo do evento deve ser um dos valores permitidos: Feira de Adoção, Campanha de Vacinação, Mutirão de Castração, Outro');
+        }
+
         if (!data.endereco || data.endereco.trim() === '') {
             errors.push('Endereço é obrigatório');
         }

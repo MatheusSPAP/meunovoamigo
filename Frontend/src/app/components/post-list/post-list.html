@@ -1,7 +1,19 @@
-<div class="post-grid">
+<div class="post-feed-container">
   <div *ngFor="let post of posts" class="post-card" [routerLink]="['/postagens', post.idcomunidade]">
-    <h3>{{ post.titulo }}</h3>
-    <p>{{ post.descricao }}</p>
-    <p class="post-date">{{ post.data_postagem | date:'dd/MM/yyyy' }}</p>
+    <div class="post-meta">
+      <p class="post-author">Por {{ post.nome_usuario || 'Usuário desconhecido' }}</p>
+      <p class="post-date">em {{ post.data_postagem | date:'dd/MM/yyyy' }}</p>
+    </div>
+
+    <div *ngIf="post.animal_idAnimal" class="post-animal-info">
+      <img *ngIf="post.foto_animal" [src]="post.foto_animal" [alt]="post.nome_animal" class="animal-photo-feed">
+      <p>Sobre: <strong>{{ post.nome_animal }}</strong></p>
+    </div>
+
+    <div class="post-content">
+      <h3>{{ post.titulo }}</h3>
+      <p>{{ post.descricao | slice:0:150 }}...</p>
+      <a [routerLink]="['/postagens', post.idcomunidade]" class="btn-link">Ler mais</a>
+    </div>
   </div>
 </div>

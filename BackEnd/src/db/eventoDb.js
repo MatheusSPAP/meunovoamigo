@@ -24,13 +24,13 @@ class EventoDb {
         }
     }
 
-    static async selectAll() {
+    static async selectAll(ordenar = 'ASC') {
         const conn = await db.connect();
 
         const query = `SELECT e.*, u.nome as nome_usuario
                        FROM evento e
                        LEFT JOIN usuario u ON e.fk_idusuario = u.idusuario
-                       ORDER BY e.data ASC`;
+                       ORDER BY e.data ${ordenar}`;
         
         try {
             const [result] = await conn.execute(query);
@@ -60,14 +60,14 @@ class EventoDb {
         }
     }
 
-    static async selectByUsuario(idusuario) {
+    static async selectByUsuario(idusuario, ordenar = 'ASC') {
         const conn = await db.connect();
 
         const query = `SELECT e.*, u.nome as nome_usuario
                        FROM evento e
                        LEFT JOIN usuario u ON e.fk_idusuario = u.idusuario
                        WHERE e.fk_idusuario = ?
-                       ORDER BY e.data ASC`;
+                       ORDER BY e.data ${ordenar}`;
         
         try {
             const [result] = await conn.execute(query, [idusuario]);
@@ -79,14 +79,14 @@ class EventoDb {
         }
     }
 
-    static async selectByTipo(tipo_evento) {
+    static async selectByTipo(tipo_evento, ordenar = 'ASC') {
         const conn = await db.connect();
 
         const query = `SELECT e.*, u.nome as nome_usuario
                        FROM evento e
                        LEFT JOIN usuario u ON e.fk_idusuario = u.idusuario
                        WHERE e.tipo_evento = ?
-                       ORDER BY e.data ASC`;
+                       ORDER BY e.data ${ordenar}`;
         
         try {
             const [result] = await conn.execute(query, [tipo_evento]);
@@ -98,17 +98,32 @@ class EventoDb {
         }
     }
 
-    static async selectByData(dataInicio, dataFim) {
+    static async selectByData(dataInicio, dataFim, ordenar = 'ASC') {
         const conn = await db.connect();
 
-        const query = `SELECT e.*, u.nome as nome_usuario
+        let query = `SELECT e.*, u.nome as nome_usuario
                        FROM evento e
-                       LEFT JOIN usuario u ON e.fk_idusuario = u.idusuario
-                       WHERE e.data BETWEEN ? AND ?
-                       ORDER BY e.data ASC`;
+                       LEFT JOIN usuario u ON e.fk_idusuario = u.idusuario`;
+        let params = [];
+        let whereClauses = [];
+
+        if (dataInicio) {
+            whereClauses.push('e.data >= ?');
+            params.push(dataInicio);
+        }
+        if (dataFim) {
+            whereClauses.push('e.data <= ?');
+            params.push(dataFim);
+        }
+
+        if (whereClauses.length > 0) {
+            query += ' WHERE ' + whereClauses.join(' AND ');
+        }
+
+        query += ` ORDER BY e.data ${ordenar}`;
         
         try {
-            const [result] = await conn.execute(query, [dataInicio, dataFim]);
+            const [result] = await conn.execute(query, params);
             conn.release();
             return result;
         } catch (error) {

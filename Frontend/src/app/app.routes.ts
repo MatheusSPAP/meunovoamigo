@@ -13,6 +13,8 @@ import { InteresseAdocaoListComponent } from './components/interesse-adocao-list
 import { AnimalRegisterComponent } from './components/animal-register/animal-register';
 import { PostCreateComponent } from './components/post-create/post-create';
 import { PostDetailComponent } from './components/post-detail/post-detail';
+import { EventCreateComponent } from './components/event-create/event-create'; // Adicionado
+import { EventDetailComponent } from './components/event-detail/event-detail'; // Adicionado
 
 export const routes: Routes = [
     { path: '', component: HomeComponent }, // Home now handles login/register
@@ -25,6 +27,8 @@ export const routes: Routes = [
     { path: 'postagens/:id', component: PostDetailComponent, canActivate: [AuthGuard] }, // New Post Detail route
     { path: 'criar-postagem', component: PostCreateComponent, canActivate: [AuthGuard] },
     { path: 'eventos', component: EventListComponent, canActivate: [AuthGuard] },
+    { path: 'eventos/:id', component: EventDetailComponent, canActivate: [AuthGuard] }, // Adicionado
+    { path: 'cadastrar-evento', component: EventCreateComponent, canActivate: [AuthGuard] }, // Adicionado
     { path: 'perfil', component: UserProfileComponent, canActivate: [AuthGuard] },
     { path: 'interesses-adocao', component: InteresseAdocaoListComponent, canActivate: [AuthGuard] },
     { path: 'cadastrar-animal', component: AnimalRegisterComponent, canActivate: [AuthGuard] },

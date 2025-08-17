@@ -20,6 +20,7 @@ export class InteresseAdocaoListComponent implements OnInit {
   currentUserId: number | null = null;
   errorMessage: string = '';
   statuses: Status[] = [];
+  selectedTab: 'manifested' | 'received' = 'manifested'; // Adicionado
 
   constructor(
     private interesseAdocaoService: InteresseAdocaoService,
@@ -73,6 +74,10 @@ export class InteresseAdocaoListComponent implements OnInit {
         this.errorMessage = 'Erro ao carregar status.';
       }
     });
+  }
+
+  selectTab(tab: 'manifested' | 'received'): void {
+    this.selectedTab = tab;
   }
 
   aprovarInteresse(interesseId: number, animalId: number): void {

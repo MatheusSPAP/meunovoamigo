@@ -12,4 +12,6 @@ export interface InteresseAdocao {
   nome_dono_animal?: string;
   dono_email?: string;
   dono_telefone?: string;
+  interessado_email?: string; // Adicionado
+  interessado_telefone?: string; // Adicionado
 }
