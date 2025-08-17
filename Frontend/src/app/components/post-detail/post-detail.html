@@ -1,6 +1,12 @@
 <div *ngIf="post" class="post-detail-container">
   <h2>{{ post.titulo }}</h2>
-  <p class="post-meta">Por {{ post.usuario_idusuario }} em {{ post.data_postagem | date:'dd/MM/yyyy' }}</p>
+  <p class="post-meta">Por {{ post.nome_usuario || 'Usuário desconhecido' }} em {{ post.data_postagem | date:'dd/MM/yyyy' }}</p>
+
+  <div *ngIf="post.animal_idAnimal" class="animal-info-card">
+    <img *ngIf="post.foto_animal" [src]="post.foto_animal" [alt]="post.nome_animal" class="animal-avatar">
+    <p>Esta postagem é sobre: <strong>{{ post.nome_animal }}</strong></p>
+  </div>
+
   <p class="post-description">{{ post.descricao }}</p>
   <!-- You can add more details here like animal info if needed -->
 

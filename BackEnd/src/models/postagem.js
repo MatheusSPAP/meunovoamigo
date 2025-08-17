@@ -24,10 +24,6 @@ class Postagem {
             errors.push('Data da postagem é obrigatória');
         }
 
-        if (!data.animal_idAnimal) {
-            errors.push('ID do animal é obrigatório');
-        }
-
         if (!data.usuario_idusuario) {
             errors.push('ID do usuário é obrigatório');
         }

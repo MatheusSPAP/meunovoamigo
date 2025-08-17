@@ -5,21 +5,13 @@ class InteresseAdocaoDb {
     static async insert(model) {
         const conn = await db.connect();
 
-        const mensagem = model.mensagem;
-        const interesse_status = model.interesse_status;
-        const data_interesse = model.data_interesse;
-        const usuario_idusuario = model.usuario_idusuario;
-        const animal_idAnimal = model.animal_idAnimal;
-        const animal_fk_idusuario = model.animal_fk_idusuario;
-        const animal_fk_idstatus = model.animal_fk_idstatus;
+        const { mensagem, interesse_status, data_interesse, usuario_idusuario, animal_idAnimal } = model;
 
-        const query = `INSERT INTO interesse_adocao (mensagem, interesse_status, data_interesse, 
-                       usuario_idusuario, animal_idAnimal, animal_fk_idusuario, animal_fk_idstatus) 
-                       VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        const query = `INSERT INTO interesse_adocao (mensagem, interesse_status, data_interesse, usuario_idusuario, animal_idAnimal) 
+                       VALUES (?, ?, ?, ?, ?)`;
 
         try {
-            const [result] = await conn.execute(query, [mensagem, interesse_status, data_interesse, 
-                usuario_idusuario, animal_idAnimal, animal_fk_idusuario, animal_fk_idstatus]);
+            const [result] = await conn.execute(query, [mensagem, interesse_status, data_interesse, usuario_idusuario, animal_idAnimal]);
             conn.release();
             return result;
         } catch (error) {
@@ -36,7 +28,7 @@ class InteresseAdocaoDb {
                        FROM interesse_adocao i
                        LEFT JOIN usuario u ON i.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON i.animal_idAnimal = a.idAnimal
-                       LEFT JOIN usuario u2 ON i.animal_fk_idusuario = u2.idusuario
+                       LEFT JOIN usuario u2 ON a.fk_idusuario = u2.idusuario
                        ORDER BY i.data_interesse DESC`;
         
         try {
@@ -57,7 +49,7 @@ class InteresseAdocaoDb {
                        FROM interesse_adocao i
                        LEFT JOIN usuario u ON i.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON i.animal_idAnimal = a.idAnimal
-                       LEFT JOIN usuario u2 ON i.animal_fk_idusuario = u2.idusuario
+                       LEFT JOIN usuario u2 ON a.fk_idusuario = u2.idusuario
                        WHERE i.idinteresse_adocao = ?`;
         
         try {
@@ -78,7 +70,7 @@ class InteresseAdocaoDb {
                        FROM interesse_adocao i
                        LEFT JOIN usuario u ON i.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON i.animal_idAnimal = a.idAnimal
-                       LEFT JOIN usuario u2 ON i.animal_fk_idusuario = u2.idusuario
+                       LEFT JOIN usuario u2 ON a.fk_idusuario = u2.idusuario
                        WHERE i.usuario_idusuario = ?
                        ORDER BY i.data_interesse DESC`;
         
@@ -100,7 +92,7 @@ class InteresseAdocaoDb {
                        FROM interesse_adocao i
                        LEFT JOIN usuario u ON i.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON i.animal_idAnimal = a.idAnimal
-                       LEFT JOIN usuario u2 ON i.animal_fk_idusuario = u2.idusuario
+                       LEFT JOIN usuario u2 ON a.fk_idusuario = u2.idusuario
                        WHERE i.animal_idAnimal = ?
                        ORDER BY i.data_interesse DESC`;
         
@@ -122,8 +114,8 @@ class InteresseAdocaoDb {
                        FROM interesse_adocao i
                        LEFT JOIN usuario u ON i.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON i.animal_idAnimal = a.idAnimal
-                       LEFT JOIN usuario u2 ON i.animal_fk_idusuario = u2.idusuario
-                       WHERE i.animal_fk_idusuario = ?
+                       LEFT JOIN usuario u2 ON a.fk_idusuario = u2.idusuario
+                       WHERE a.fk_idusuario = ?
                        ORDER BY i.data_interesse DESC`;
         
         try {
@@ -144,7 +136,7 @@ class InteresseAdocaoDb {
                        FROM interesse_adocao i
                        LEFT JOIN usuario u ON i.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON i.animal_idAnimal = a.idAnimal
-                       LEFT JOIN usuario u2 ON i.animal_fk_idusuario = u2.idusuario
+                       LEFT JOIN usuario u2 ON a.fk_idusuario = u2.idusuario
                        WHERE i.interesse_status = ?
                        ORDER BY i.data_interesse DESC`;
         
@@ -202,6 +194,45 @@ class InteresseAdocaoDb {
             conn.release();
             return result;
         } catch (error) {
+            conn.release();
+            throw error;
+        }
+    }
+
+    static async aprovarAdocao(id) {
+        const conn = await db.connect();
+        try {
+            await conn.beginTransaction();
+
+            // 1. Obter o id do animal a partir do interesse
+            const [rows] = await conn.execute('SELECT animal_idAnimal FROM interesse_adocao WHERE idinteresse_adocao = ?', [id]);
+            if (rows.length === 0) {
+                throw new Error('Interesse de adoção não encontrado.');
+            }
+            const animalId = rows[0].animal_idAnimal;
+
+            // 2. Obter o id do status 'Adotado'
+            const [statusRows] = await conn.execute('SELECT idstatus FROM status WHERE tipo = ?', ['Adotado']);
+            if (statusRows.length === 0) {
+                throw new Error('Status \'Adotado\' não encontrado na tabela de status.');
+            }
+            const adotadoStatusId = statusRows[0].idstatus;
+
+            // 3. Atualizar o status do animal para 'Adotado'
+            await conn.execute('UPDATE animal SET fk_idstatus = ? WHERE idAnimal = ?', [adotadoStatusId, animalId]);
+
+            // 4. Atualizar o interesse de adoção aprovado para 'Aprovado'
+            await conn.execute('UPDATE interesse_adocao SET interesse_status = ? WHERE idinteresse_adocao = ?', ['Aprovado', id]);
+
+            // 5. Rejeitar todos os outros interesses para o mesmo animal
+            await conn.execute('UPDATE interesse_adocao SET interesse_status = ? WHERE animal_idAnimal = ? AND idinteresse_adocao != ?', ['Recusado', animalId, id]);
+
+            await conn.commit();
+            conn.release();
+            return { success: true, message: 'Adoção aprovada com sucesso.' };
+
+        } catch (error) {
+            await conn.rollback();
             conn.release();
             throw error;
         }

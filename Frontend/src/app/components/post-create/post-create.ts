@@ -29,7 +29,7 @@ export class PostCreateComponent implements OnInit {
     this.postForm = new FormGroup({
       titulo: new FormControl('', [Validators.required, Validators.maxLength(45)]),
       descricao: new FormControl('', [Validators.required, Validators.maxLength(255)]),
-      animal_idAnimal: new FormControl('', [Validators.required])
+      animal_idAnimal: new FormControl('')
     });
   }
 

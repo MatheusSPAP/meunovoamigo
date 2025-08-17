@@ -1,10 +1,10 @@
 class Comentario {
-    constructor(fk_idcomunidade, fk_idusuario, mensagem, data_comentario, id_comentario) {
+    constructor(fk_idcomunidade, fk_idusuario, mensagem, data_comentario, id_comentario = null) {
         this.fk_idcomunidade = fk_idcomunidade;
         this.fk_idusuario = fk_idusuario;
         this.mensagem = mensagem;
         this.data_comentario = data_comentario;
-        this.id_comentario = id_comentario;
+        this.id_comentario = id_comentario; // ID pode ser nulo ao criar
     }
 
     // Método para validar dados obrigatórios
@@ -25,10 +25,6 @@ class Comentario {
 
         if (!data.data_comentario) {
             errors.push('Data do comentário é obrigatória');
-        }
-
-        if (!data.id_comentario) {
-            errors.push('ID do comentário é obrigatório');
         }
 
         // Validação de tamanho da mensagem

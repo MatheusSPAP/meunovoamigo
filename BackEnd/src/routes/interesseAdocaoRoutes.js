@@ -18,5 +18,8 @@ router.get('/status/:status', InteresseAdocaoController.getByStatus);           
 // Rota especial para atualizar apenas o status
 router.patch('/:id/status', InteresseAdocaoController.updateStatus);                   // PATCH /interesses-adocao/:id/status - Atualizar apenas o status
 
+// Rota para aprovar uma adoção
+router.post('/:id/aprovar', InteresseAdocaoController.aprovar);                         // POST /interesses-adocao/:id/aprovar - Aprova a adoção
+
 module.exports = router;
 

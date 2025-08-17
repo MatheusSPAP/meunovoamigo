@@ -71,9 +71,7 @@ export class PostDetailComponent implements OnInit {
       const comentarioData = {
         fk_idcomunidade: this.post.idcomunidade,
         fk_idusuario: Number(userId),
-        mensagem: this.comentarioForm.value.mensagem,
-        data_comentario: new Date().toISOString().slice(0, 10),
-        id_comentario: 0 // Backend should handle this, but required by model
+        mensagem: this.comentarioForm.value.mensagem
       };
 
       this.comentarioService.createComentario(comentarioData).subscribe({

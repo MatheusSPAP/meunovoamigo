@@ -26,14 +26,11 @@
     </div>
 
     <div>
-      <label for="animal_idAnimal">Animal:</label>
+      <label for="animal_idAnimal">Animal (opcional):</label>
       <select id="animal_idAnimal" formControlName="animal_idAnimal">
-        <option value="">Selecione um animal</option>
+        <option [ngValue]="null">Nenhum</option>
         <option *ngFor="let animal of userAnimals" [value]="animal.idAnimal">{{ animal.nome }}</option>
       </select>
-      <div *ngIf="postForm.get('animal_idAnimal')?.invalid && (postForm.get('animal_idAnimal')?.dirty || postForm.get('animal_idAnimal')?.touched)">
-        Animal é obrigatório.
-      </div>
     </div>
 
     <button type="submit" [disabled]="!postForm.valid">Criar Postagem</button>

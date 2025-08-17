@@ -76,28 +76,14 @@ export class InteresseAdocaoListComponent implements OnInit {
   }
 
   aprovarInteresse(interesseId: number, animalId: number): void {
-    this.interesseAdocaoService.updateInteresseStatus(interesseId, 'Aprovado').subscribe({
+    this.interesseAdocaoService.aprovarAdocao(interesseId).subscribe({
       next: (response) => {
-        console.log('Interesse aprovado com sucesso!', response);
-        const adotadoStatus = this.statuses.find(status => status.tipo === 'Adotado');
-        if (adotadoStatus) {
-          this.animalService.updateAnimalStatus(animalId, adotadoStatus.idstatus).subscribe({
-            next: (animalResponse) => {
-              console.log('Status do animal atualizado para Adotado!', animalResponse);
-              this.loadInteresses();
-            },
-            error: (animalError) => {
-              console.error('Erro ao atualizar status do animal!', animalError);
-              this.errorMessage = 'Erro ao atualizar status do animal.';
-            }
-          });
-        } else {
-          this.errorMessage = 'Status "Adotado" não encontrado.';
-        }
+        console.log('Adoção aprovada com sucesso!', response);
+        this.loadInteresses(); // Recarrega a lista para refletir as mudanças
       },
       error: (error) => {
-        console.error('Erro ao aprovar interesse!', error);
-        this.errorMessage = 'Erro ao aprovar interesse.';
+        console.error('Erro ao aprovar adoção!', error);
+        this.errorMessage = error.error.message || 'Ocorreu um erro ao aprovar a adoção.';
       }
     });
   }

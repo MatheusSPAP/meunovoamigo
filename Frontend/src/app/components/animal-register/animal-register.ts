@@ -36,7 +36,7 @@ export class AnimalRegisterComponent implements OnInit {
   comportamentos: Comportamento[] = [];
   racas: Raca[] = [];
   filteredRacas: Raca[] = []; // For filtering by animal type
-  statuses: Status[] = [];
+  disponivelStatusId: number | null = null;
 
   constructor(
     private animalService: AnimalService,
@@ -55,7 +55,6 @@ export class AnimalRegisterComponent implements OnInit {
       descricao: new FormControl('', [Validators.required]),
       castrado: new FormControl(false),
       vacinado: new FormControl(false),
-      fk_idstatus: new FormControl('', [Validators.required]),
       tipo_idtipo_animal: new FormControl('', [Validators.required]),
       tamanho_animal_idtamanho_animal: new FormControl('', [Validators.required]),
       comportamento_idcomportamento: new FormControl('', [Validators.required]),
@@ -76,11 +75,9 @@ export class AnimalRegisterComponent implements OnInit {
       this.filteredRacas = this.racas;
     });
     this.statusService.getStatus().subscribe((response: any) => {
-      this.statuses = response.data;
-      // Set default status to 'Disponível'
-      const disponivelStatus = this.statuses.find(status => status.tipo === 'Disponível');
+      const disponivelStatus = response.data.find((status: Status) => status.tipo === 'Disponível');
       if (disponivelStatus) {
-        this.animalForm.get('fk_idstatus')?.setValue(disponivelStatus.idstatus);
+        this.disponivelStatusId = disponivelStatus.idstatus;
       }
     });
   }
@@ -106,9 +103,15 @@ export class AnimalRegisterComponent implements OnInit {
         return;
       }
 
+      if (!this.disponivelStatusId) {
+        this.errorMessage = 'Não foi possível definir o status padrão do animal. Tente novamente mais tarde.';
+        return;
+      }
+
       const animalData = {
         ...this.animalForm.value,
-        fk_idusuario: Number(userId) // Assign current logged-in user as owner
+        fk_idusuario: Number(userId), // Assign current logged-in user as owner
+        fk_idstatus: this.disponivelStatusId
       };
 
       this.animalService.createAnimal(animalData).subscribe({

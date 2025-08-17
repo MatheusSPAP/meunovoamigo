@@ -13,20 +13,26 @@
     </div>
   </div>
 
-  <button (click)="toggleInterestForm()" class="interest-button">Manifestar Interesse</button>
+  <div *ngIf="animal.status_tipo === 'Disponível'">
+    <button (click)="toggleInterestForm()" class="interest-button">Manifestar Interesse</button>
 
-  <div *ngIf="showInterestForm" class="interest-form-section">
-    <h3>Manifestar Interesse em Adoção</h3>
-    <form [formGroup]="interesseForm" (ngSubmit)="onSubmitInteresse()">
-      <div>
-        <label for="mensagem">Mensagem:</label>
-        <textarea id="mensagem" formControlName="mensagem" rows="4"></textarea>
-        <div *ngIf="interesseForm.get('mensagem')?.invalid && (interesseForm.get('mensagem')?.dirty || interesseForm.get('mensagem')?.touched)">
-          Mensagem é obrigatória e deve ter no máximo 255 caracteres.
+    <div *ngIf="showInterestForm" class="interest-form-section">
+      <h3>Manifestar Interesse em Adoção</h3>
+      <form [formGroup]="interesseForm" (ngSubmit)="onSubmitInteresse()">
+        <div>
+          <label for="mensagem">Mensagem:</label>
+          <textarea id="mensagem" formControlName="mensagem" rows="4"></textarea>
+          <div *ngIf="interesseForm.get('mensagem')?.invalid && (interesseForm.get('mensagem')?.dirty || interesseForm.get('mensagem')?.touched)">
+            Mensagem é obrigatória e deve ter no máximo 255 caracteres.
+          </div>
         </div>
-      </div>
-      <button type="submit" [disabled]="!interesseForm.valid">Enviar Interesse</button>
-    </form>
+        <button type="submit" [disabled]="!interesseForm.valid">Enviar Interesse</button>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="animal.status_tipo === 'Adotado'" class="status-adotado-message">
+    <p>Este animal já encontrou um lar! ❤️</p>
   </div>
 
   <div *ngIf="successMessage" class="success-message">

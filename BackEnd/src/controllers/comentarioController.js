@@ -6,7 +6,16 @@ class ComentarioController {
     // Criar novo comentário
     static async create(req, res) {
         try {
-            const errors = Comentario.validate(req.body);
+            const { fk_idcomunidade, fk_idusuario, mensagem } = req.body;
+
+            const model = {
+                fk_idcomunidade,
+                fk_idusuario,
+                mensagem,
+                data_comentario: new Date()
+            };
+
+            const errors = Comentario.validate(model);
             if (errors.length > 0) {
                 return res.status(400).json({
                     success: false,
@@ -15,12 +24,12 @@ class ComentarioController {
                 });
             }
 
-            const result = await ComentarioDb.insert(req.body);
+            const result = await ComentarioDb.insert(model);
             
             res.status(201).json({
                 success: true,
                 message: 'Comentário criado com sucesso',
-                data: result
+                data: { id: result.insertId }
             });
 
         } catch (error) {

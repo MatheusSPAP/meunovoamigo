@@ -6,7 +6,17 @@ class PostagemController {
     // Criar nova postagem
     static async create(req, res) {
         try {
-            const errors = Postagem.validate(req.body);
+            const { titulo, descricao, animal_idAnimal, usuario_idusuario } = req.body;
+
+            const model = {
+                titulo,
+                descricao,
+                animal_idAnimal: animal_idAnimal || null, // Garante que seja nulo se não for enviado
+                usuario_idusuario,
+                data_postagem: new Date()
+            };
+
+            const errors = Postagem.validate(model);
             if (errors.length > 0) {
                 return res.status(400).json({
                     success: false,
@@ -15,7 +25,7 @@ class PostagemController {
                 });
             }
 
-            const result = await PostagemDb.insert(req.body);
+            const result = await PostagemDb.insert(model);
             
             res.status(201).json({
                 success: true,

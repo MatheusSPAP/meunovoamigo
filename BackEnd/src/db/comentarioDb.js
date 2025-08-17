@@ -5,16 +5,12 @@ class ComentarioDb {
     static async insert(model) {
         const conn = await db.connect();
 
-        const fk_idcomunidade = model.fk_idcomunidade;
-        const fk_idusuario = model.fk_idusuario;
-        const mensagem = model.mensagem;
-        const data_comentario = model.data_comentario;
-        const id_comentario = model.id_comentario;
+        const { fk_idcomunidade, fk_idusuario, mensagem, data_comentario } = model;
 
-        const query = 'INSERT INTO comentario (fk_idcomunidade, fk_idusuario, mensagem, data_comentario, id_comentario) VALUES (?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO comentario (fk_idcomunidade, fk_idusuario, mensagem, data_comentario) VALUES (?, ?, ?, ?)';
 
         try {
-            const [result] = await conn.execute(query, [fk_idcomunidade, fk_idusuario, mensagem, data_comentario, id_comentario]);
+            const [result] = await conn.execute(query, [fk_idcomunidade, fk_idusuario, mensagem, data_comentario]);
             conn.release();
             return result;
         } catch (error) {

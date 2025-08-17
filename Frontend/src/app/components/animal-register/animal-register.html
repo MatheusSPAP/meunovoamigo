@@ -99,16 +99,7 @@
       </div>
     </div>
 
-    <div>
-      <label for="fk_idstatus">Status:</label>
-      <select id="fk_idstatus" formControlName="fk_idstatus">
-        <option value="">Selecione</option>
-        <option *ngFor="let status of statuses" [value]="status.idstatus">{{ status.tipo }}</option>
-      </select>
-      <div *ngIf="animalForm.get('fk_idstatus')?.invalid && (animalForm.get('fk_idstatus')?.dirty || animalForm.get('fk_idstatus')?.touched)">
-        Status é obrigatório.
-      </div>
-    </div>
+    
 
     <button type="submit" [disabled]="!animalForm.valid">Cadastrar Animal</button>
   </form>

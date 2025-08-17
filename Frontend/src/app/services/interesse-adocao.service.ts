@@ -15,7 +15,7 @@ export class InteresseAdocaoService {
     return this.http.get<InteresseAdocao[]>(this.apiUrl);
   }
 
-  createInteresseAdocao(data: { mensagem: string, usuario_idusuario: number, animal_idAnimal: number, animal_fk_idusuario: number, animal_fk_idstatus: number }): Observable<any> {
+  createInteresseAdocao(data: { mensagem: string, usuario_idusuario: number, animal_idAnimal: number }): Observable<any> {
     const payload = {
       ...data,
       interesse_status: 'Aguardando',
@@ -33,6 +33,10 @@ export class InteresseAdocaoService {
   }
 
   updateInteresseStatus(id: number, status: string): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/status/${id}`, { status });
+    return this.http.patch(`${this.apiUrl}/${id}/status`, { status });
+  }
+
+  aprovarAdocao(id: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}/aprovar`, {});
   }
 }

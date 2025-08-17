@@ -62,9 +62,7 @@ export class AnimalDetailComponent implements OnInit {
       const interesseData = {
         mensagem: this.interesseForm.value.mensagem,
         usuario_idusuario: Number(userId),
-        animal_idAnimal: this.animal.idAnimal,
-        animal_fk_idusuario: this.animal.fk_idusuario,
-        animal_fk_idstatus: this.animal.fk_idstatus
+        animal_idAnimal: this.animal.idAnimal
       };
 
       this.interesseAdocaoService.createInteresseAdocao(interesseData).subscribe({

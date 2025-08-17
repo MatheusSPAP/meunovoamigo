@@ -1,12 +1,41 @@
 const InteresseAdocaoDb = require('../db/interesseAdocaoDb');
 const InteresseAdocao = require('../models/interesseAdocao');
+const AnimalDb = require('../db/animalDb'); // Importar AnimalDb
 
 class InteresseAdocaoController {
 
     // Criar novo interesse de adoção
     static async create(req, res) {
         try {
-            const errors = InteresseAdocao.validate(req.body);
+            const { mensagem, usuario_idusuario, animal_idAnimal } = req.body;
+
+            // 1. Verificar se o animal está disponível para adoção
+            const animal = await AnimalDb.selectById(animal_idAnimal);
+
+            if (!animal) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Animal não encontrado.'
+                });
+            }
+
+            if (animal.status_tipo !== 'Disponível') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Este animal não está mais disponível para adoção.'
+                });
+            }
+
+            // 2. Se estiver disponível, prosseguir com a criação do interesse
+            const model = {
+                mensagem,
+                usuario_idusuario,
+                animal_idAnimal,
+                interesse_status: 'Aguardando',
+                data_interesse: new Date()
+            };
+
+            const errors = InteresseAdocao.validate(model);
             if (errors.length > 0) {
                 return res.status(400).json({
                     success: false,
@@ -15,7 +44,7 @@ class InteresseAdocaoController {
                 });
             }
 
-            const result = await InteresseAdocaoDb.insert(req.body);
+            const result = await InteresseAdocaoDb.insert(model);
             
             res.status(201).json({
                 success: true,
@@ -276,6 +305,45 @@ class InteresseAdocaoController {
             res.status(500).json({
                 success: false,
                 message: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    // Aprovar uma adoção
+    static async aprovar(req, res) {
+        try {
+            const { id } = req.params;
+
+            // Verificar se interesse existe
+            const existingInteresse = await InteresseAdocaoDb.selectById(id);
+            if (!existingInteresse) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Interesse de adoção não encontrado'
+                });
+            }
+
+            // Verificar se o interesse já não está como Aguardando
+            if (existingInteresse.interesse_status !== 'Aguardando') {
+                return res.status(400).json({
+                    success: false,
+                    message: `Não é possível aprovar um interesse com status "${existingInteresse.interesse_status}"`
+                });
+            }
+
+            const result = await InteresseAdocaoDb.aprovarAdocao(id);
+
+            res.status(200).json({
+                success: true,
+                message: result.message
+            });
+
+        } catch (error) {
+            console.error('Erro ao aprovar adoção:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor ao aprovar adoção.',
+                error: error.message
             });
         }
     }
