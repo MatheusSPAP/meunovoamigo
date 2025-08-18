@@ -17,6 +17,7 @@ export class HomeComponent implements OnInit {
   showLoginForm: boolean = true;
   loginErrorMessage: string = '';
   registroErrorMessage: string = '';
+  registroSuccessMessage: string = '';
 
   constructor(
     private usuarioService: UsuarioService,
@@ -38,10 +39,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Se o usuário já estiver logado, redireciona para o dashboard
-    if (this.usuarioService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
-    }
+    // A lógica de redirecionamento foi removida. O AuthGuard agora é o único responsável por proteger as rotas.
   }
 
   toggleForm(): void {
@@ -75,11 +73,13 @@ export class HomeComponent implements OnInit {
 
   onSubmitRegistro(): void {
     this.registroErrorMessage = '';
+    this.registroSuccessMessage = ''; // Limpa a mensagem de sucesso
     if (this.registroForm.valid) {
       this.usuarioService.registrarUsuario(this.registroForm.value).subscribe({
         next: (response) => {
           if (response.success) {
-            this.router.navigate(['/dashboard']); // Ou redirecionar para login
+            this.toggleForm(); // Alterna para o formulário de login
+            this.registroSuccessMessage = 'Registro realizado com sucesso! Faça o login para continuar.';
           }
         },
         error: (error) => {

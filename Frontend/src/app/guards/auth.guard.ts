@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 import { UsuarioService } from '../usuario.service';
 
 @Injectable({
@@ -12,13 +13,17 @@ export class AuthGuard implements CanActivate {
 
   canActivate(
     route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+    state: RouterStateSnapshot): Observable<boolean | UrlTree> {
     
-    if (this.usuarioService.isLoggedIn()) {
-      return true;
-    } else {
-      // Redirect to the login page
-      return this.router.createUrlTree(['/login']);
-    }
+    return this.usuarioService.isLoggedIn$.pipe(
+      take(1), // Pega o valor mais recente e completa
+      map(isLoggedIn => {
+        if (isLoggedIn) {
+          return true;
+        }
+        // Redireciona para a página de login se não estiver logado
+        return this.router.createUrlTree(['/']);
+      })
+    );
   }
 }

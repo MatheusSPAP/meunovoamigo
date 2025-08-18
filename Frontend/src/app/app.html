@@ -1,8 +1,10 @@
-<nav class="main-nav">
+<!-- O cabeçalho de navegação só será exibido se o usuário estiver logado -->
+<nav class="main-nav" *ngIf="isUserLoggedIn">
   <div class="nav-group-main">
-    <a [routerLink]="isLoggedIn() ? '/dashboard' : '/'">Home</a>
+    <!-- O link "Home" para usuários logados agora aponta para o dashboard -->
+    <a routerLink="/dashboard">Home</a>
 
-    <div class="dropdown" *ngIf="isLoggedIn()">
+    <div class="dropdown">
       <a routerLink="/animais" class="dropbtn">Animais</a>
       <div class="dropdown-content">
         <a routerLink="/animais">Ver Animais</a>
@@ -10,7 +12,7 @@
       </div>
     </div>
 
-    <div class="dropdown" *ngIf="isLoggedIn()">
+    <div class="dropdown">
       <a routerLink="/postagens" class="dropbtn">Comunidade</a>
       <div class="dropdown-content">
         <a routerLink="/postagens">Ver Postagens</a>
@@ -18,7 +20,7 @@
       </div>
     </div>
 
-    <div class="dropdown" *ngIf="isLoggedIn()">
+    <div class="dropdown">
       <a routerLink="/eventos" class="dropbtn">Eventos</a>
       <div class="dropdown-content">
         <a routerLink="/eventos">Ver Eventos</a>
@@ -27,7 +29,7 @@
     </div>
   </div>
 
-    <div class="nav-group-user" *ngIf="isLoggedIn()">
+  <div class="nav-group-user">
     <a routerLink="/interesses-adocao">Interesses de Adoção</a>
     <div class="dropdown">
       <span *ngIf="currentUserName" class="dropbtn">Olá, {{ currentUserName }}!</span>
@@ -37,8 +39,7 @@
       </div>
     </div>
   </div>
-
-  <div class="nav-group-auth" *ngIf="!isLoggedIn()">
-  </div>
 </nav>
+
+<!-- O router-outlet renderiza a página de login/registro (se não logado) ou o conteúdo da rota (se logado) -->
 <router-outlet></router-outlet>
