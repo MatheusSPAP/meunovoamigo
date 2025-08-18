@@ -1,117 +1,221 @@
-const Evento = require("../models/evento");
+const EventoDb = require('../db/eventoDb');
+const Evento = require('../models/evento');
 
 class EventoController {
-    async getAllEventos(req, res) {
+
+    // Criar novo evento
+    static async create(req, res) {
         try {
-            const eventos = await Evento.getAll();
-            res.json(eventos);
+            const errors = Evento.validate(req.body);
+            if (errors.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dados inválidos',
+                    errors: errors
+                });
+            }
+
+            const result = await EventoDb.insert(req.body);
+            
+            res.status(201).json({
+                success: true,
+                message: 'Evento criado com sucesso',
+                data: { id: result.insertId }
+            });
+
         } catch (error) {
-            console.error("Erro ao buscar eventos:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao criar evento:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async getEventoById(req, res) {
+    // Listar todos os eventos
+    static async getAll(req, res) {
+        try {
+            const { ordenar } = req.query; // Pega o parâmetro de ordenação
+            const eventos = await EventoDb.selectAll(ordenar);
+
+            res.status(200).json({
+                success: true,
+                data: eventos
+            });
+
+        } catch (error) {
+            console.error('Erro ao buscar eventos:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    // Buscar evento por ID
+    static async getById(req, res) {
         try {
             const { id } = req.params;
-            const evento = await Evento.getById(id);
-            
+            const evento = await EventoDb.selectById(id);
+
             if (!evento) {
-                return res.status(404).json({ error: "Evento não encontrado" });
+                return res.status(404).json({
+                    success: false,
+                    message: 'Evento não encontrado'
+                });
             }
-            
-            res.json(evento);
+
+            res.status(200).json({
+                success: true,
+                data: evento
+            });
+
         } catch (error) {
-            console.error("Erro ao buscar evento:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar evento:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async createEvento(req, res) {
+    // Buscar eventos por usuário
+    static async getByUsuario(req, res) {
         try {
-            const { titulo, tipo_evento, data, endereco, descricao, fk_idusuario } = req.body;
-            
-            if (!titulo || !tipo_evento || !data || !endereco || !descricao || !fk_idusuario) {
-                return res.status(400).json({ error: "Todos os campos são obrigatórios" });
-            }
+            const { idusuario } = req.params;
+            const { ordenar } = req.query; // Pega o parâmetro de ordenação
+            const eventos = await EventoDb.selectByUsuario(idusuario, ordenar);
 
-            const evento = await Evento.create(titulo, tipo_evento, data, endereco, descricao, fk_idusuario);
-            res.status(201).json(evento);
+            res.status(200).json({
+                success: true,
+                data: eventos
+            });
+
         } catch (error) {
-            console.error("Erro ao criar evento:", error);
-            if (error.message === "Usuário não encontrado") {
-                return res.status(400).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar eventos por usuário:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async updateEvento(req, res) {
-        try {
-            const { id } = req.params;
-            const { titulo, tipo_evento, data, endereco, descricao, fk_idusuario } = req.body;
-            
-            const evento = await Evento.update(id, titulo, tipo_evento, data, endereco, descricao, fk_idusuario);
-            res.json(evento);
-        } catch (error) {
-            console.error("Erro ao atualizar evento:", error);
-            if (error.message === "Evento não encontrado") {
-                return res.status(404).json({ error: error.message });
-            }
-            if (error.message === "Usuário não encontrado" || error.message === "Nenhum campo para atualizar") {
-                return res.status(400).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
-        }
-    }
-
-    async deleteEvento(req, res) {
-        try {
-            const { id } = req.params;
-            
-            const result = await Evento.delete(id);
-            res.json(result);
-        } catch (error) {
-            console.error("Erro ao deletar evento:", error);
-            if (error.message === "Evento não encontrado") {
-                return res.status(404).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
-        }
-    }
-
-    async getEventosByUsuario(req, res) {
-        try {
-            const { usuarioId } = req.params;
-            const eventos = await Evento.getByUsuario(usuarioId);
-            res.json(eventos);
-        } catch (error) {
-            console.error("Erro ao buscar eventos por usuário:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
-        }
-    }
-
-    async getEventosByTipo(req, res) {
+    // Buscar eventos por tipo
+    static async getByTipo(req, res) {
         try {
             const { tipo } = req.params;
-            const eventos = await Evento.getByTipo(tipo);
-            res.json(eventos);
+            const { ordenar } = req.query; // Pega o parâmetro de ordenação
+            const eventos = await EventoDb.selectByTipo(tipo, ordenar);
+
+            res.status(200).json({
+                success: true,
+                data: eventos
+            });
+
         } catch (error) {
-            console.error("Erro ao buscar eventos por tipo:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar eventos por tipo:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async getProximosEventos(req, res) {
+    // Buscar eventos por período
+    static async getByPeriodo(req, res) {
         try {
-            const eventos = await Evento.getProximos();
-            res.json(eventos);
+            const { dataInicio, dataFim, ordenar } = req.query; // Pega o parâmetro de ordenação
+
+            if (!dataInicio) { // Data de início é obrigatória
+                return res.status(400).json({
+                    success: false,
+                    message: 'Data de início é obrigatória para buscar por período.'
+                });
+            }
+
+            const eventos = await EventoDb.selectByData(dataInicio, dataFim, ordenar);
+
+            res.status(200).json({
+                success: true,
+                data: eventos
+            });
+
         } catch (error) {
-            console.error("Erro ao buscar próximos eventos:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar eventos por período:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    // Atualizar evento
+    static async update(req, res) {
+        try {
+            const { id } = req.params;
+            const eventoData = { ...req.body, idEvento: id };
+
+            const errors = Evento.validate(eventoData);
+            if (errors.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dados inválidos',
+                    errors: errors
+                });
+            }
+
+            const existingEvento = await EventoDb.selectById(id);
+            if (!existingEvento) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Evento não encontrado'
+                });
+            }
+
+            await EventoDb.update(eventoData);
+
+            res.status(200).json({
+                success: true,
+                message: 'Evento atualizado com sucesso'
+            });
+
+        } catch (error) {
+            console.error('Erro ao atualizar evento:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    // Deletar evento
+    static async delete(req, res) {
+        try {
+            const { id } = req.params;
+
+            const existingEvento = await EventoDb.selectById(id);
+            if (!existingEvento) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Evento não encontrado'
+                });
+            }
+
+            await EventoDb.delete(id);
+
+            res.status(200).json({
+                success: true,
+                message: 'Evento deletado com sucesso'
+            });
+
+        } catch (error) {
+            console.error('Erro ao deletar evento:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 }
 
-module.exports = new EventoController();
-
+module.exports = EventoController;

@@ -1,0 +1,57 @@
+<div class="event-create-container">
+  <h2>Cadastrar Novo Evento</h2>
+
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="eventForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label for="titulo">Título:</label>
+      <input type="text" id="titulo" formControlName="titulo">
+      <div *ngIf="eventForm.get('titulo')?.invalid && (eventForm.get('titulo')?.dirty || eventForm.get('titulo')?.touched)">
+        Título é obrigatório e deve ter no máximo 255 caracteres.
+      </div>
+    </div>
+
+    <div>
+      <label for="tipo_evento">Tipo de Evento:</label>
+      <select id="tipo_evento" formControlName="tipo_evento">
+        <option value="">Selecione</option>
+        <option *ngFor="let tipo of eventTypes" [value]="tipo">{{ tipo }}</option>
+      </select>
+      <div *ngIf="eventForm.get('tipo_evento')?.invalid && (eventForm.get('tipo_evento')?.dirty || eventForm.get('tipo_evento')?.touched)">
+        Tipo de evento é obrigatório.
+      </div>
+    </div>
+
+    <div>
+      <label for="endereco">Endereço:</label>
+      <input type="text" id="endereco" formControlName="endereco">
+      <div *ngIf="eventForm.get('endereco')?.invalid && (eventForm.get('endereco')?.dirty || eventForm.get('endereco')?.touched)">
+        Endereço é obrigatório e deve ter no máximo 45 caracteres.
+      </div>
+    </div>
+
+    <div>
+      <label for="descricao">Descrição:</label>
+      <textarea id="descricao" formControlName="descricao" rows="4"></textarea>
+      <div *ngIf="eventForm.get('descricao')?.invalid && (eventForm.get('descricao')?.dirty || eventForm.get('descricao')?.touched)">
+        Descrição é obrigatória e deve ter no máximo 255 caracteres.
+      </div>
+    </div>
+
+    <div>
+      <label for="data">Data:</label>
+      <input type="date" id="data" formControlName="data">
+      <div *ngIf="eventForm.get('data')?.invalid && (eventForm.get('data')?.dirty || eventForm.get('data')?.touched)">
+        Data é obrigatória.
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="!eventForm.valid">Cadastrar Evento</button>
+  </form>
+</div>

@@ -1,28 +1,13 @@
-const statusController = require("../controllers/statusController");
+const express = require('express');
+const router = express.Router();
+const StatusController = require('../controllers/statusController');
 
-const statusRoutes = {
-    async handleRequest(req, res) {
-        const path = req.url;
-        const method = req.method;
-        
-        if (path.startsWith("/api/status")) {
-            if (method === "GET" && path === "/api/status") {
-                await statusController.getAllStatus(req, res);
-            } else if (method === "GET" && req.params.id) {
-                await statusController.getStatusById(req, res);
-            } else if (method === "POST" && path === "/api/status") {
-                await statusController.createStatus(req, res);
-            } else if (method === "PUT" && req.params.id) {
-                await statusController.updateStatus(req, res);
-            } else if (method === "DELETE" && req.params.id) {
-                await statusController.deleteStatus(req, res);
-            } else {
-                res.status(404).json({ error: "Rota não encontrada" });
-            }
-        }
-    }
-};
+// Rotas para status
+router.post('/', StatusController.create);           // POST /status - Criar status
+router.get('/', StatusController.getAll);            // GET /status - Listar todos os status
+router.get('/:id', StatusController.getById);        // GET /status/:id - Buscar status por ID
+router.put('/:id', StatusController.update);         // PUT /status/:id - Atualizar status
+router.delete('/:id', StatusController.delete);      // DELETE /status/:id - Deletar status
 
-module.exports = statusRoutes;
-
+module.exports = router;
 

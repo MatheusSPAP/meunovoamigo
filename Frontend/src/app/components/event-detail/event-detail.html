@@ -1,0 +1,13 @@
+<div *ngIf="event" class="event-detail-container">
+  <h2>{{ event.titulo }}</h2>
+  <div class="event-info">
+    <p><strong>Tipo:</strong> {{ event.tipo_evento }}</p>
+    <p><strong>Data:</strong> {{ event.data | date:'dd/MM/yyyy' }}</p>
+    <p><strong>Endereço:</strong> {{ event.endereco }}</p>
+    <p><strong>Descrição:</strong> {{ event.descricao }}</p>
+    <p><strong>Organizado por:</strong> {{ event.nome_usuario }}</p>
+  </div>
+</div>
+<div *ngIf="!event">
+  <p>Evento não encontrado ou carregando...</p>
+</div>

@@ -1,30 +1,16 @@
-const usuarioController = require('../controllers/usuarioController');
+const express = require('express');
+const router = express.Router();
+const UsuarioController = require('../controllers/usuarioController');
 
-const usuarioRoutes = {
-    async handleRequest(req, res) {
-        const path = req.url;
-        const method = req.method;
-        
-        if (path.startsWith('/api/usuarios')) {
-            if (method === 'GET' && !req.params.id) {
-                await usuarioController.getAllUsuarios(req, res);
-            } else if (method === 'GET' && req.params.id) {
-                await usuarioController.getUsuarioById(req, res);
-            } else if (method === 'POST' && path === '/api/usuarios') {
-                await usuarioController.createUsuario(req, res);
-            } else if (method === 'POST' && path === '/api/usuarios/login') {
-                await usuarioController.loginUsuario(req, res);
-            } else if (method === 'PUT' && req.params.id) {
-                await usuarioController.updateUsuario(req, res);
-            } else if (method === 'DELETE' && req.params.id) {
-                await usuarioController.deleteUsuario(req, res);
-            } else {
-                res.status(404).json({ error: 'Rota não encontrada' });
-            }
-        }
-    }
-};
+// Rotas para usuários
+router.post('/', UsuarioController.create);           // POST /usuarios - Criar usuário
+router.get('/', UsuarioController.getAll);            // GET /usuarios - Listar todos os usuários
+router.get('/:id', UsuarioController.getById);        // GET /usuarios/:id - Buscar usuário por ID
+router.put('/:id', UsuarioController.update);         // PUT /usuarios/:id - Atualizar usuário
+router.delete('/:id', UsuarioController.delete);      // DELETE /usuarios/:id - Deletar usuário
 
-module.exports = usuarioRoutes;
+// Rota especial para login
+router.post('/login', UsuarioController.login);       // POST /usuarios/login - Login
 
+module.exports = router;
 

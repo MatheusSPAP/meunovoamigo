@@ -1,124 +1,91 @@
-const db = require("../db/dbConfig");
-
 class Evento {
-    static async getAll() {
-        const query = `
-            SELECT 
-                e.idEvento, e.titulo, e.tipo_evento, e.data, e.endereco, e.descricao,
-                e.fk_idusuario, u.nome as organizador_nome
-            FROM evento e
-            LEFT JOIN usuario u ON e.fk_idusuario = u.idusuario
-            ORDER BY e.data DESC
-        `;
-        return await db.executeQuery(query);
+    constructor(idEvento, titulo, tipo_evento, endereco, descricao, data, fk_idusuario) {
+        this.idEvento = idEvento;
+        this.titulo = titulo;
+        this.tipo_evento = tipo_evento;
+        this.endereco = endereco;
+        this.descricao = descricao;
+        this.data = data;
+        this.fk_idusuario = fk_idusuario;
     }
 
-    static async getById(id) {
-        const query = `
-            SELECT 
-                e.idEvento, e.titulo, e.tipo_evento, e.data, e.endereco, e.descricao,
-                e.fk_idusuario, u.nome as organizador_nome
-            FROM evento e
-            LEFT JOIN usuario u ON e.fk_idusuario = u.idusuario
-            WHERE e.idEvento = ?
-        `;
-        const eventos = await db.executeQuery(query, [id]);
-        return eventos.length > 0 ? eventos[0] : null;
-    }
+    // Método para validar dados obrigatórios
+    static validate(data) {
+        const errors = [];
 
-    static async create(titulo, tipo_evento, data, endereco, descricao, fk_idusuario) {
-        const userCheck = await db.executeQuery('SELECT idusuario FROM usuario WHERE idusuario = ?', [fk_idusuario]);
-        if (userCheck.length === 0) {
-            throw new Error('Usuário não encontrado');
+        if (!data.titulo || data.titulo.trim() === '') {
+            errors.push('Título é obrigatório');
         }
 
-        const insertQuery = 'INSERT INTO evento (titulo, tipo_evento, data, endereco, descricao, fk_idusuario) VALUES (?, ?, ?, ?, ?, ?)';
-        const result = await db.executeQuery(insertQuery, [titulo, tipo_evento, data, endereco, descricao, fk_idusuario]);
-        return this.getById(result.insertId);
-    }
-
-    static async update(id, titulo, tipo_evento, data, endereco, descricao, fk_idusuario) {
-        const checkQuery = 'SELECT idEvento FROM evento WHERE idEvento = ?';
-        const existingEvento = await db.executeQuery(checkQuery, [id]);
-        if (existingEvento.length === 0) {
-            throw new Error('Evento não encontrado');
+        if (!data.tipo_evento || data.tipo_evento.trim() === '') {
+            errors.push('Tipo do evento é obrigatório');
         }
 
-        if (fk_idusuario) {
-            const userCheck = await db.executeQuery('SELECT idusuario FROM usuario WHERE idusuario = ?', [fk_idusuario]);
-            if (userCheck.length === 0) {
-                throw new Error('Usuário não encontrado');
-            }
+        const tiposPermitidos = ['Feira de Adoção', 'Campanha de Vacinação', 'Mutirão de Castração', 'Outro'];
+        if (data.tipo_evento && !tiposPermitidos.includes(data.tipo_evento)) {
+            errors.push('Tipo do evento deve ser um dos valores permitidos: Feira de Adoção, Campanha de Vacinação, Mutirão de Castração, Outro');
         }
 
-        const updates = [];
-        const values = [];
-        if (titulo) { updates.push('titulo = ?'); values.push(titulo); }
-        if (tipo_evento) { updates.push('tipo_evento = ?'); values.push(tipo_evento); }
-        if (data) { updates.push('data = ?'); values.push(data); }
-        if (endereco) { updates.push('endereco = ?'); values.push(endereco); }
-        if (descricao) { updates.push('descricao = ?'); values.push(descricao); }
-        if (fk_idusuario) { updates.push('fk_idusuario = ?'); values.push(fk_idusuario); }
-
-        if (updates.length === 0) {
-            throw new Error('Nenhum campo para atualizar');
+        if (!data.endereco || data.endereco.trim() === '') {
+            errors.push('Endereço é obrigatório');
         }
 
-        values.push(id);
-        const updateQuery = `UPDATE evento SET ${updates.join(', ')} WHERE idEvento = ?`;
-        await db.executeQuery(updateQuery, values);
-        return this.getById(id);
-    }
-
-    static async delete(id) {
-        const checkQuery = 'SELECT idEvento FROM evento WHERE idEvento = ?';
-        const existingEvento = await db.executeQuery(checkQuery, [id]);
-        if (existingEvento.length === 0) {
-            throw new Error('Evento não encontrado');
+        if (!data.descricao || data.descricao.trim() === '') {
+            errors.push('Descrição é obrigatória');
         }
 
-        const deleteQuery = 'DELETE FROM evento WHERE idEvento = ?';
-        await db.executeQuery(deleteQuery, [id]);
-        return { message: 'Evento deletado com sucesso' };
+        if (!data.data) {
+            errors.push('Data é obrigatória');
+        }
+
+        if (!data.fk_idusuario) {
+            errors.push('ID do usuário é obrigatório');
+        }
+
+        // Validação de tamanho dos campos
+        if (data.titulo && data.titulo.length > 255) {
+            errors.push('Título deve ter no máximo 255 caracteres');
+        }
+
+        if (data.tipo_evento && data.tipo_evento.length > 45) {
+            errors.push('Tipo do evento deve ter no máximo 45 caracteres');
+        }
+
+        if (data.endereco && data.endereco.length > 45) {
+            errors.push('Endereço deve ter no máximo 45 caracteres');
+        }
+
+        if (data.descricao && data.descricao.length > 255) {
+            errors.push('Descrição deve ter no máximo 255 caracteres');
+        }
+
+        return errors;
     }
 
-    static async getByUsuario(usuarioId) {
-        const query = `
-            SELECT 
-                e.idEvento, e.titulo, e.tipo_evento, e.data, e.endereco, e.descricao,
-                e.fk_idusuario, u.nome as organizador_nome
-            FROM evento e
-            LEFT JOIN usuario u ON e.fk_idusuario = u.idusuario
-            WHERE e.fk_idusuario = ?
-            ORDER BY e.data DESC
-        `;
-        return await db.executeQuery(query, [usuarioId]);
+    // Método para criar instância a partir de dados do banco
+    static fromDatabase(row) {
+        return new Evento(
+            row.idEvento,
+            row.titulo,
+            row.tipo_evento,
+            row.endereco,
+            row.descricao,
+            row.data,
+            row.fk_idusuario
+        );
     }
 
-    static async getByTipo(tipo) {
-        const query = `
-            SELECT 
-                e.idEvento, e.titulo, e.tipo_evento, e.data, e.endereco, e.descricao,
-                e.fk_idusuario, u.nome as organizador_nome
-            FROM evento e
-            LEFT JOIN usuario u ON e.fk_idusuario = u.idusuario
-            WHERE e.tipo_evento = ?
-            ORDER BY e.data DESC
-        `;
-        return await db.executeQuery(query, [tipo]);
-    }
-
-    static async getProximos() {
-        const query = `
-            SELECT 
-                e.idEvento, e.titulo, e.tipo_evento, e.data, e.endereco, e.descricao,
-                e.fk_idusuario, u.nome as organizador_nome
-            FROM evento e
-            LEFT JOIN usuario u ON e.fk_idusuario = u.idusuario
-            WHERE e.data >= NOW()
-            ORDER BY e.data ASC
-        `;
-        return await db.executeQuery(query);
+    // Método para converter para objeto simples
+    toObject() {
+        return {
+            idEvento: this.idEvento,
+            titulo: this.titulo,
+            tipo_evento: this.tipo_evento,
+            endereco: this.endereco,
+            descricao: this.descricao,
+            data: this.data,
+            fk_idusuario: this.fk_idusuario
+        };
     }
 }
 

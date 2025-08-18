@@ -1,0 +1,32 @@
+.animal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.animal-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.animal-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.animal-status {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.animal-status.disponivel {
+  color: green;
+}
+
+.animal-status.adotado {
+  color: red;
+}

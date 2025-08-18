@@ -1,0 +1,38 @@
+<div class="post-create-container">
+  <h2>Criar Nova Postagem</h2>
+
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label for="titulo">Título:</label>
+      <input type="text" id="titulo" formControlName="titulo">
+      <div *ngIf="postForm.get('titulo')?.invalid && (postForm.get('titulo')?.dirty || postForm.get('titulo')?.touched)">
+        Título é obrigatório e deve ter no máximo 45 caracteres.
+      </div>
+    </div>
+
+    <div>
+      <label for="descricao">Descrição:</label>
+      <textarea id="descricao" formControlName="descricao" rows="4"></textarea>
+      <div *ngIf="postForm.get('descricao')?.invalid && (postForm.get('descricao')?.dirty || postForm.get('descricao')?.touched)">
+        Descrição é obrigatória e deve ter no máximo 255 caracteres.
+      </div>
+    </div>
+
+    <div>
+      <label for="animal_idAnimal">Animal (opcional):</label>
+      <select id="animal_idAnimal" formControlName="animal_idAnimal">
+        <option [ngValue]="null">Nenhum</option>
+        <option *ngFor="let animal of userAnimals" [value]="animal.idAnimal">{{ animal.nome }}</option>
+      </select>
+    </div>
+
+    <button type="submit" [disabled]="!postForm.valid">Criar Postagem</button>
+  </form>
+</div>

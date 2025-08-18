@@ -1,36 +1,17 @@
-const animalController = require("../controllers/animalController");
+const express = require('express');
+const router = express.Router();
+const AnimalController = require('../controllers/animalController');
 
-const animalRoutes = {
-    async handleRequest(req, res) {
-        const path = req.url;
-        const method = req.method;
-        
-        if (path.startsWith("/api/animais")) {
-            if (method === "GET" && path === "/api/animais") {
-                await animalController.getAllAnimais(req, res);
-            } else if (method === "GET" && path.startsWith("/api/animais/") && req.params.id) {
-                await animalController.getAnimalById(req, res);
-            } else if (method === "GET" && path.startsWith("/api/animais/status/")) {
-                req.params.status = path.split("/")[4];
-                await animalController.getAnimaisByStatus(req, res);
-            } else if (method === "GET" && path.startsWith("/api/animais/tipo/")) {
-                req.params.tipo = path.split("/")[4];
-                await animalController.getAnimaisByTipo(req, res);
-            } else if (method === "GET" && path.startsWith("/api/animais/localizacao")) {
-                await animalController.getAnimaisByLocation(req, res);
-            } else if (method === "POST" && path === "/api/animais") {
-                await animalController.createAnimal(req, res);
-            } else if (method === "PUT" && path.startsWith("/api/animais/") && req.params.id) {
-                await animalController.updateAnimal(req, res);
-            } else if (method === "DELETE" && path.startsWith("/api/animais/") && req.params.id) {
-                await animalController.deleteAnimal(req, res);
-            } else {
-                res.status(404).json({ error: "Rota não encontrada" });
-            }
-        }
-    }
-};
+// Rotas para animais
+router.post('/', AnimalController.create);                        // POST /animais - Criar animal
+router.get('/', AnimalController.getAll);                         // GET /animais - Listar todos os animais
+router.get('/:id', AnimalController.getById);                     // GET /animais/:id - Buscar animal por ID
+router.put('/:id', AnimalController.update);                      // PUT /animais/:id - Atualizar animal
+router.delete('/:id', AnimalController.delete);                   // DELETE /animais/:id - Deletar animal
 
-module.exports = animalRoutes;
+// Rotas especiais para filtros
+router.get('/usuario/:idusuario', AnimalController.getByUsuario); // GET /animais/usuario/:idusuario - Buscar animais por usuário
+router.get('/status/:idstatus', AnimalController.getByStatus);    // GET /animais/status/:idstatus - Buscar animais por status
 
+module.exports = router;
 

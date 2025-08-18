@@ -1,96 +1,60 @@
-const db = require("../db/dbConfig");
-
 class Comentario {
-    static async getByPublicacao(publicacao_id) {
-        const query = `
-            SELECT 
-                c.id_comentario, c.fk_idcomunidade, c.fk_idusuario,
-                c.mensagem, c.data,
-                u.nome as autor_nome
-            FROM comentario c
-            LEFT JOIN usuario u ON c.fk_idusuario = u.idusuario
-            WHERE c.fk_idcomunidade = ?
-            ORDER BY c.data ASC
-        `;
-        return await db.executeQuery(query, [publicacao_id]);
+    constructor(fk_idcomunidade, fk_idusuario, mensagem, data_comentario, id_comentario = null) {
+        this.fk_idcomunidade = fk_idcomunidade;
+        this.fk_idusuario = fk_idusuario;
+        this.mensagem = mensagem;
+        this.data_comentario = data_comentario;
+        this.id_comentario = id_comentario; // ID pode ser nulo ao criar
     }
 
-    static async create(fk_idcomunidade, fk_idusuario, mensagem) {
-        const publicacaoCheck = await db.executeQuery('SELECT idcomunidade FROM publicacao WHERE idcomunidade = ?', [fk_idcomunidade]);
-        if (publicacaoCheck.length === 0) {
-            throw new Error('Publicação não encontrada');
+    // Método para validar dados obrigatórios
+    static validate(data) {
+        const errors = [];
+
+        if (!data.fk_idcomunidade) {
+            errors.push('ID da comunidade é obrigatório');
         }
 
-        const userCheck = await db.executeQuery('SELECT idusuario FROM usuario WHERE idusuario = ?', [fk_idusuario]);
-        if (userCheck.length === 0) {
-            throw new Error('Usuário não encontrado');
+        if (!data.fk_idusuario) {
+            errors.push('ID do usuário é obrigatório');
         }
 
-        const insertQuery = 'INSERT INTO comentario (fk_idcomunidade, fk_idusuario, mensagem, data) VALUES (?, ?, ?, CURDATE())';
-        const result = await db.executeQuery(insertQuery, [fk_idcomunidade, fk_idusuario, mensagem]);
-        
-        const newComentario = await db.executeQuery(`
-            SELECT 
-                c.id_comentario, c.fk_idcomunidade, c.fk_idusuario,
-                c.mensagem, c.data,
-                u.nome as autor_nome
-            FROM comentario c
-            LEFT JOIN usuario u ON c.fk_idusuario = u.idusuario
-            WHERE c.id_comentario = ?
-        `, [result.insertId]);
-        
-        return newComentario[0];
+        if (!data.mensagem || data.mensagem.trim() === '') {
+            errors.push('Mensagem é obrigatória');
+        }
+
+        if (!data.data_comentario) {
+            errors.push('Data do comentário é obrigatória');
+        }
+
+        // Validação de tamanho da mensagem
+        if (data.mensagem && data.mensagem.length > 255) {
+            errors.push('Mensagem deve ter no máximo 255 caracteres');
+        }
+
+        return errors;
     }
 
-    static async delete(id) {
-        const checkQuery = 'SELECT id_comentario FROM comentario WHERE id_comentario = ?';
-        const existingComentario = await db.executeQuery(checkQuery, [id]);
-        if (existingComentario.length === 0) {
-            throw new Error('Comentário não encontrado');
-        }
-
-        const deleteQuery = 'DELETE FROM comentario WHERE id_comentario = ?';
-        await db.executeQuery(deleteQuery, [id]);
-        return { message: 'Comentário deletado com sucesso' };
+    // Método para criar instância a partir de dados do banco
+    static fromDatabase(row) {
+        return new Comentario(
+            row.fk_idcomunidade,
+            row.fk_idusuario,
+            row.mensagem,
+            row.data_comentario,
+            row.id_comentario
+        );
     }
 
-    static async update(id, mensagem) {
-        const checkQuery = 'SELECT id_comentario FROM comentario WHERE id_comentario = ?';
-        const existingComentario = await db.executeQuery(checkQuery, [id]);
-        if (existingComentario.length === 0) {
-            throw new Error('Comentário não encontrado');
-        }
-
-        const updateQuery = 'UPDATE comentario SET mensagem = ? WHERE id_comentario = ?';
-        await db.executeQuery(updateQuery, [mensagem, id]);
-        
-        const updatedComentario = await db.executeQuery(`
-            SELECT 
-                c.id_comentario, c.fk_idcomunidade, c.fk_idusuario,
-                c.mensagem, c.data,
-                u.nome as autor_nome
-            FROM comentario c
-            LEFT JOIN usuario u ON c.fk_idusuario = u.idusuario
-            WHERE c.id_comentario = ?
-        `, [id]);
-        
-        return updatedComentario[0];
-    }
-
-    static async getByUsuario(usuarioId) {
-        const query = `
-            SELECT 
-                c.id_comentario, c.fk_idcomunidade, c.fk_idusuario,
-                c.mensagem, c.data,
-                u.nome as autor_nome,
-                p.titulo as publicacao_titulo
-            FROM comentario c
-            LEFT JOIN usuario u ON c.fk_idusuario = u.idusuario
-            LEFT JOIN publicacao p ON c.fk_idcomunidade = p.idcomunidade
-            WHERE c.fk_idusuario = ?
-            ORDER BY c.data DESC
-        `;
-        return await db.executeQuery(query, [usuarioId]);
+    // Método para converter para objeto simples
+    toObject() {
+        return {
+            fk_idcomunidade: this.fk_idcomunidade,
+            fk_idusuario: this.fk_idusuario,
+            mensagem: this.mensagem,
+            data_comentario: this.data_comentario,
+            id_comentario: this.id_comentario
+        };
     }
 }
 

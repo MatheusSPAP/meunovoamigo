@@ -1,28 +1,19 @@
-const comentarioController = require("../controllers/comentarioController");
+const express = require('express');
+const router = express.Router();
+const ComentarioController = require('../controllers/comentarioController');
 
-const comentarioRoutes = {
-    async handleRequest(req, res) {
-        const path = req.url;
-        const method = req.method;
-        
-        if (path.startsWith("/api/comentarios")) {
-            if (method === "GET" && path.startsWith("/api/comentarios/publicacao/") && req.params.publicacaoId) {
-                await comentarioController.getComentariosByPublicacao(req, res);
-            } else if (method === "GET" && path.startsWith("/api/comentarios/usuario/") && req.params.usuarioId) {
-                await comentarioController.getComentariosByUsuario(req, res);
-            } else if (method === "POST" && path === "/api/comentarios") {
-                await comentarioController.createComentario(req, res);
-            } else if (method === "PUT" && req.params.id) {
-                await comentarioController.updateComentario(req, res);
-            } else if (method === "DELETE" && req.params.id) {
-                await comentarioController.deleteComentario(req, res);
-            } else {
-                res.status(404).json({ error: "Rota não encontrada" });
-            }
-        }
-    }
-};
+// Rotas para comentários
+router.post('/', ComentarioController.create);                                                    // POST /comentarios - Criar comentário
+router.get('/', ComentarioController.getAll);                                                     // GET /comentarios - Listar todos os comentários
 
-module.exports = comentarioRoutes;
+// Rotas especiais para filtros
+router.get('/postagem/:idcomunidade', ComentarioController.getByPostagem);                       // GET /comentarios/postagem/:idcomunidade - Buscar comentários por postagem
+router.get('/usuario/:idusuario', ComentarioController.getByUsuario);                            // GET /comentarios/usuario/:idusuario - Buscar comentários por usuário
 
+// Rotas para comentário específico (chave composta)
+router.get('/:idcomunidade/:idusuario/:id_comentario', ComentarioController.getById);            // GET /comentarios/:idcomunidade/:idusuario/:id_comentario - Buscar comentário específico
+router.put('/:idcomunidade/:idusuario/:id_comentario', ComentarioController.update);             // PUT /comentarios/:idcomunidade/:idusuario/:id_comentario - Atualizar comentário
+router.delete('/:idcomunidade/:idusuario/:id_comentario', ComentarioController.delete);          // DELETE /comentarios/:idcomunidade/:idusuario/:id_comentario - Deletar comentário
+
+module.exports = router;
 

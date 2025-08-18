@@ -1,0 +1,106 @@
+<div class="animal-register-container">
+  <h2>Cadastrar Novo Animal</h2>
+
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="animalForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label for="nome">Nome:</label>
+      <input type="text" id="nome" formControlName="nome">
+      <div *ngIf="animalForm.get('nome')?.invalid && (animalForm.get('nome')?.dirty || animalForm.get('nome')?.touched)">
+        Nome é obrigatório.
+      </div>
+    </div>
+
+    <div>
+      <label for="sexo">Sexo:</label>
+      <select id="sexo" formControlName="sexo">
+        <option value="">Selecione</option>
+        <option value="M">Macho</option>
+        <option value="F">Fêmea</option>
+      </select>
+      <div *ngIf="animalForm.get('sexo')?.invalid && (animalForm.get('sexo')?.dirty || animalForm.get('sexo')?.touched)">
+        Sexo é obrigatório.
+      </div>
+    </div>
+
+    <div>
+      <label for="foto">URL da Foto:</label>
+      <input type="text" id="foto" formControlName="foto">
+      <div *ngIf="animalForm.get('foto')?.invalid && (animalForm.get('foto')?.dirty || animalForm.get('foto')?.touched)">
+        Foto é obrigatória.
+      </div>
+    </div>
+
+    <div>
+      <label for="descricao">Descrição:</label>
+      <textarea id="descricao" formControlName="descricao" rows="4"></textarea>
+      <div *ngIf="animalForm.get('descricao')?.invalid && (animalForm.get('descricao')?.dirty || animalForm.get('descricao')?.touched)">
+        Descrição é obrigatória.
+      </div>
+    </div>
+
+    <div>
+      <label for="castrado">Castrado:</label>
+      <input type="checkbox" id="castrado" formControlName="castrado">
+    </div>
+
+    <div>
+      <label for="vacinado">Vacinado:</label>
+      <input type="checkbox" id="vacinado" formControlName="vacinado">
+    </div>
+
+    <div>
+      <label for="tipo_idtipo_animal">Tipo de Animal:</label>
+      <select id="tipo_idtipo_animal" formControlName="tipo_idtipo_animal" (change)="onTipoChange($event)">
+        <option value="">Selecione</option>
+        <option *ngFor="let tipo of tipos" [value]="tipo.idtipo_animal">{{ tipo.tipo_animal }}</option>
+      </select>
+      <div *ngIf="animalForm.get('tipo_idtipo_animal')?.invalid && (animalForm.get('tipo_idtipo_animal')?.dirty || animalForm.get('tipo_idtipo_animal')?.touched)">
+        Tipo de animal é obrigatório.
+      </div>
+    </div>
+
+    <div>
+      <label for="fk_idraca">Raça:</label>
+      <select id="fk_idraca" formControlName="fk_idraca">
+        <option value="">Selecione</option>
+        <option *ngFor="let raca of filteredRacas" [value]="raca.idraca">{{ raca.tipo_raca }}</option>
+      </select>
+      <div *ngIf="animalForm.get('fk_idraca')?.invalid && (animalForm.get('fk_idraca')?.dirty || animalForm.get('fk_idraca')?.touched)">
+        Raça é obrigatória.
+      </div>
+    </div>
+
+    <div>
+      <label for="tamanho_animal_idtamanho_animal">Tamanho:</label>
+      <select id="tamanho_animal_idtamanho_animal" formControlName="tamanho_animal_idtamanho_animal">
+        <option value="">Selecione</option>
+        <option *ngFor="let tamanho of tamanhos" [value]="tamanho.idtamanho_animal">{{ tamanho.descricao }}</option>
+      </select>
+      <div *ngIf="animalForm.get('tamanho_animal_idtamanho_animal')?.invalid && (animalForm.get('tamanho_animal_idtamanho_animal')?.dirty || animalForm.get('tamanho_animal_idtamanho_animal')?.touched)">
+        Tamanho é obrigatório.
+      </div>
+    </div>
+
+    <div>
+      <label for="comportamento_idcomportamento">Comportamento:</label>
+      <select id="comportamento_idcomportamento" formControlName="comportamento_idcomportamento">
+        <option value="">Selecione</option>
+        <option *ngFor="let comportamento of comportamentos" [value]="comportamento.idcomportamento">{{ comportamento.descricao }}</option>
+      </select>
+      <div *ngIf="animalForm.get('comportamento_idcomportamento')?.invalid && (animalForm.get('comportamento_idcomportamento')?.dirty || animalForm.get('comportamento_idcomportamento')?.touched)">
+        Comportamento é obrigatório.
+      </div>
+    </div>
+
+    
+
+    <button type="submit" [disabled]="!animalForm.valid">Cadastrar Animal</button>
+  </form>
+</div>

@@ -1,0 +1,9 @@
+<div class="animal-grid">
+  <div *ngFor="let animal of animais" class="animal-card" [routerLink]="['/animais', animal.idAnimal]">
+    <img [src]="animal.foto" [alt]="animal.nome">
+    <h3>{{ animal.nome }}</h3>
+    <p class="animal-status" [class.disponivel]="animal.status_tipo === 'Disponível'" [class.adotado]="animal.status_tipo === 'Adotado'">
+      Status: {{ animal.status_tipo }}
+    </p>
+  </div>
+</div>

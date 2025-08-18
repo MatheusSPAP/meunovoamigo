@@ -1,0 +1,50 @@
+<div *ngIf="post" class="post-detail-container">
+  <div class="post-detail-header">
+    <h2>{{ post.titulo }}</h2>
+    <p class="post-meta">Por {{ post.nome_usuario || 'Usuário desconhecido' }} em {{ post.data_postagem | date:'dd/MM/yyyy' }}</p>
+  </div>
+
+  <div *ngIf="post.animal_idAnimal" class="animal-info-card">
+    <img *ngIf="post.foto_animal" [src]="post.foto_animal" [alt]="post.nome_animal" class="animal-avatar">
+    <p>Esta postagem é sobre: <strong>{{ post.nome_animal }}</strong></p>
+  </div>
+
+  <div class="post-content-body">
+    <p class="post-description">{{ post.descricao }}</p>
+  </div>
+
+  <div class="comments-section">
+    <h3>Comentários</h3>
+    <div *ngIf="comentarios.length === 0" class="no-comments-message">
+      <p>Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+    </div>
+    <div *ngFor="let comentario of comentarios" class="comment-card">
+      <p class="comment-meta">Usuário {{ comentario.fk_idusuario }} em {{ comentario.data_comentario | date:'dd/MM/yyyy' }}</p>
+      <p class="comment-message">{{ comentario.mensagem }}</p>
+    </div>
+
+    <div class="comment-form-section">
+      <h4>Adicionar Comentário</h4>
+      <form [formGroup]="comentarioForm" (ngSubmit)="onSubmitComentario()">
+        <div class="form-group">
+          <label for="comentarioMensagem">Sua mensagem:</label>
+          <textarea id="comentarioMensagem" formControlName="mensagem" rows="3"></textarea>
+          <div *ngIf="comentarioForm.get('mensagem')?.invalid && (comentarioForm.get('mensagem')?.dirty || comentarioForm.get('mensagem')?.touched)" class="error-text">
+            Mensagem é obrigatória e deve ter no máximo 255 caracteres.
+          </div>
+        </div>
+        <button type="submit" [disabled]="!comentarioForm.valid">Comentar</button>
+      </form>
+    </div>
+
+    <div *ngIf="successMessage" class="success-message">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+  </div>
+</div>
+<div *ngIf="!post" class="loading-message">
+  <p>Postagem não encontrada ou carregando...</p>
+</div>

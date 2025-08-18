@@ -1,0 +1,177 @@
+.interesse-adocao-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.interesse-adocao-container h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 2em;
+}
+
+.error-message {
+  background-color: #ffe0e0;
+  color: #d32f2f;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Estilos das Abas */
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #eee;
+}
+
+.tab-button {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #555;
+  border-radius: 8px 8px 0 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tab-button:hover {
+  background-color: #e0e0e0;
+}
+
+.tab-button.active {
+  background-color: #007bff;
+  color: white;
+  border-bottom: 2px solid #007bff;
+}
+
+.tab-content {
+  padding: 20px 0;
+}
+
+/* Grid de Interesses */
+.interesse-adocao-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.interesse-adocao-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease-in-out;
+}
+
+.interesse-adocao-card:hover {
+  transform: translateY(-5px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1.3em;
+  color: #333;
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: white;
+}
+
+.status-aguardando {
+  background-color: #ffc107; /* Amarelo */
+}
+
+.status-aprovado {
+  background-color: #28a745; /* Verde */
+}
+
+.status-recusado {
+  background-color: #dc3545; /* Vermelho */
+}
+
+.interesse-adocao-card p {
+  font-size: 0.95em;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.contact-info {
+  background-color: #e9f7ef;
+  border: 1px solid #d4edda;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 15px;
+}
+
+.contact-info h4 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color: #28a745;
+  font-size: 1em;
+}
+
+.contact-info p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.btn-aprovar {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-aprovar:hover {
+  background-color: #0056b3;
+}
+
+.btn-recusar {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-recusar:hover {
+  background-color: #c82333;
+}
+
+.no-content-message {
+  text-align: center;
+  color: #777;
+  font-size: 1.2em;
+  padding: 50px 0;
+}

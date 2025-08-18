@@ -1,0 +1,199 @@
+.dashboard-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-container h2 {
+  color: #333;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.dashboard-container p {
+  color: #666;
+  font-size: 1.1em;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  background-color: #ffe0e0;
+  color: #d32f2f;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Grid para os widgets */
+.dashboard-widgets-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr; /* Uma coluna por padrão (mobile) */
+}
+
+@media (min-width: 768px) {
+  .dashboard-widgets-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Colunas responsivas */
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-widgets-grid {
+    grid-template-columns: 1fr 1fr; /* Duas colunas para desktop */
+  }
+
+  .full-width-card {
+    grid-column: span 2; /* Cartão de largura total */
+  }
+}
+
+/* Estilo dos cartões */
+.dashboard-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-card h3 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.dashboard-section {
+  flex-grow: 1; /* Faz a seção preencher o espaço disponível no card */
+}
+
+/* Estilos específicos para o widget Meus Animais */
+.alert-card {
+  background-color: #fff3e0;
+  color: #e65100;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.animal-list-dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.animal-card-dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 120px;
+}
+
+.animal-photo-dashboard {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 5px;
+  border: 2px solid #ddd;
+}
+
+.animal-details-dashboard h4 {
+  margin: 5px 0;
+  font-size: 1em;
+}
+
+.animal-details-dashboard p {
+  font-size: 0.9em;
+  color: #555;
+}
+
+/* Estilos para Minha Jornada de Adoção */
+.dashboard-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0;
+}
+
+.dashboard-section ul li {
+  margin-bottom: 8px;
+  font-size: 1.1em;
+  color: #444;
+}
+
+/* Estilos para Atividade da Comunidade */
+.post-list-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.post-card-dashboard {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.post-card-dashboard h4 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.post-card-dashboard p {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+/* Botões */
+.btn-primary,
+.btn-secondary {
+  display: inline-block;
+  padding: 10px 15px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}

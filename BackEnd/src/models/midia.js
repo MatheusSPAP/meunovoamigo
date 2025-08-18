@@ -1,97 +1,99 @@
-const db = require("../db/dbConfig");
-
 class Midia {
-    static async getAll() {
-        const query = `
-            SELECT 
-                m.idmidia, m.nome, m.tamanho,
-                m.postagem_idcomunidade, m.postagem_animal_idAnimal, m.postagem_usuario_idusuario,
-                p.titulo as publicacao_titulo
-            FROM midia m
-            LEFT JOIN publicacao p ON m.postagem_idcomunidade = p.idcomunidade
-        `;
-        return await db.executeQuery(query);
+    constructor(idmidia, nome_arquivo, tipo, tamanho, caminho, data_upload, 
+                postagem_idcomunidade, postagem_animal_idAnimal, postagem_usuario_idusuario) {
+        this.idmidia = idmidia;
+        this.nome_arquivo = nome_arquivo;
+        this.tipo = tipo;
+        this.tamanho = tamanho;
+        this.caminho = caminho;
+        this.data_upload = data_upload;
+        this.postagem_idcomunidade = postagem_idcomunidade;
+        this.postagem_animal_idAnimal = postagem_animal_idAnimal;
+        this.postagem_usuario_idusuario = postagem_usuario_idusuario;
     }
 
-    static async getById(id) {
-        const query = `
-            SELECT 
-                m.idmidia, m.nome, m.tamanho,
-                m.postagem_idcomunidade, m.postagem_animal_idAnimal, m.postagem_usuario_idusuario,
-                p.titulo as publicacao_titulo
-            FROM midia m
-            LEFT JOIN publicacao p ON m.postagem_idcomunidade = p.idcomunidade
-            WHERE m.idmidia = ?
-        `;
-        const midias = await db.executeQuery(query, [id]);
-        return midias.length > 0 ? midias[0] : null;
+    // Método para validar dados obrigatórios
+    static validate(data) {
+        const errors = [];
+
+        if (!data.nome_arquivo || data.nome_arquivo.trim() === '') {
+            errors.push('Nome do arquivo é obrigatório');
+        }
+
+        if (!data.tipo || data.tipo.trim() === '') {
+            errors.push('Tipo é obrigatório');
+        }
+
+        if (!data.tamanho || data.tamanho <= 0) {
+            errors.push('Tamanho deve ser maior que zero');
+        }
+
+        if (!data.caminho || data.caminho.trim() === '') {
+            errors.push('Caminho é obrigatório');
+        }
+
+        if (!data.data_upload) {
+            errors.push('Data de upload é obrigatória');
+        }
+
+        if (!data.postagem_idcomunidade) {
+            errors.push('ID da postagem é obrigatório');
+        }
+
+        if (!data.postagem_animal_idAnimal) {
+            errors.push('ID do animal da postagem é obrigatório');
+        }
+
+        if (!data.postagem_usuario_idusuario) {
+            errors.push('ID do usuário da postagem é obrigatório');
+        }
+
+        // Validação dos valores permitidos para tipo
+        const tiposPermitidos = ['foto', 'video'];
+        if (data.tipo && !tiposPermitidos.includes(data.tipo)) {
+            errors.push('Tipo deve ser "foto" ou "video"');
+        }
+
+        // Validação de tamanho dos campos
+        if (data.nome_arquivo && data.nome_arquivo.length > 255) {
+            errors.push('Nome do arquivo deve ter no máximo 255 caracteres');
+        }
+
+        if (data.caminho && data.caminho.length > 512) {
+            errors.push('Caminho deve ter no máximo 512 caracteres');
+        }
+
+        return errors;
     }
 
-    static async getByPublicacao(publicacaoId) {
-        const query = `
-            SELECT 
-                m.idmidia, m.nome, m.tamanho,
-                m.postagem_idcomunidade, m.postagem_animal_idAnimal, m.postagem_usuario_idusuario,
-                p.titulo as publicacao_titulo
-            FROM midia m
-            LEFT JOIN publicacao p ON m.postagem_idcomunidade = p.idcomunidade
-            WHERE m.postagem_idcomunidade = ?
-        `;
-        return await db.executeQuery(query, [publicacaoId]);
-    }
-
-    static async create(nome, tamanho, postagem_idcomunidade, postagem_animal_idAnimal, postagem_usuario_idusuario) {
-        const publicacaoCheck = await db.executeQuery(
-            'SELECT idcomunidade FROM publicacao WHERE idcomunidade = ? AND animal_idAnimal = ? AND usuario_idusuario = ?', 
-            [postagem_idcomunidade, postagem_animal_idAnimal, postagem_usuario_idusuario]
+    // Método para criar instância a partir de dados do banco
+    static fromDatabase(row) {
+        return new Midia(
+            row.idmidia,
+            row.nome_arquivo,
+            row.tipo,
+            row.tamanho,
+            row.caminho,
+            row.data_upload,
+            row.postagem_idcomunidade,
+            row.postagem_animal_idAnimal,
+            row.postagem_usuario_idusuario
         );
-        if (publicacaoCheck.length === 0) {
-            throw new Error('Publicação não encontrada');
-        }
-
-        const insertQuery = 'INSERT INTO midia (nome, tamanho, postagem_idcomunidade, postagem_animal_idAnimal, postagem_usuario_idusuario) VALUES (?, ?, ?, ?, ?)';
-        const result = await db.executeQuery(insertQuery, [nome, tamanho, postagem_idcomunidade, postagem_animal_idAnimal, postagem_usuario_idusuario]);
-        return this.getById(result.insertId);
     }
 
-    static async update(id, nome, tamanho) {
-        const checkQuery = 'SELECT idmidia FROM midia WHERE idmidia = ?';
-        const existingMidia = await db.executeQuery(checkQuery, [id]);
-        if (existingMidia.length === 0) {
-            throw new Error('Mídia não encontrada');
-        }
-
-        const updates = [];
-        const values = [];
-        if (nome) { updates.push('nome = ?'); values.push(nome); }
-        if (tamanho !== undefined) { updates.push('tamanho = ?'); values.push(tamanho); }
-
-        if (updates.length === 0) {
-            throw new Error('Nenhum campo para atualizar');
-        }
-
-        values.push(id);
-        const updateQuery = `UPDATE midia SET ${updates.join(', ')} WHERE idmidia = ?`;
-        await db.executeQuery(updateQuery, values);
-        return this.getById(id);
-    }
-
-    static async delete(id) {
-        const checkQuery = 'SELECT idmidia FROM midia WHERE idmidia = ?';
-        const existingMidia = await db.executeQuery(checkQuery, [id]);
-        if (existingMidia.length === 0) {
-            throw new Error('Mídia não encontrada');
-        }
-
-        const deleteQuery = 'DELETE FROM midia WHERE idmidia = ?';
-        await db.executeQuery(deleteQuery, [id]);
-        return { message: 'Mídia deletada com sucesso' };
-    }
-
-    static async deleteByPublicacao(publicacaoId) {
-        const deleteQuery = 'DELETE FROM midia WHERE postagem_idcomunidade = ?';
-        await db.executeQuery(deleteQuery, [publicacaoId]);
-        return { message: 'Mídias da publicação deletadas com sucesso' };
+    // Método para converter para objeto simples
+    toObject() {
+        return {
+            idmidia: this.idmidia,
+            nome_arquivo: this.nome_arquivo,
+            tipo: this.tipo,
+            tamanho: this.tamanho,
+            caminho: this.caminho,
+            data_upload: this.data_upload,
+            postagem_idcomunidade: this.postagem_idcomunidade,
+            postagem_animal_idAnimal: this.postagem_animal_idAnimal,
+            postagem_usuario_idusuario: this.postagem_usuario_idusuario
+        };
     }
 }
 

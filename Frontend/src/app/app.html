@@ -1,0 +1,44 @@
+<nav class="main-nav">
+  <div class="nav-group-main">
+    <a [routerLink]="isLoggedIn() ? '/dashboard' : '/'">Home</a>
+
+    <div class="dropdown" *ngIf="isLoggedIn()">
+      <a routerLink="/animais" class="dropbtn">Animais</a>
+      <div class="dropdown-content">
+        <a routerLink="/animais">Ver Animais</a>
+        <a routerLink="/cadastrar-animal">Cadastrar Animal</a>
+      </div>
+    </div>
+
+    <div class="dropdown" *ngIf="isLoggedIn()">
+      <a routerLink="/postagens" class="dropbtn">Comunidade</a>
+      <div class="dropdown-content">
+        <a routerLink="/postagens">Ver Postagens</a>
+        <a routerLink="/criar-postagem">Criar Postagem</a>
+      </div>
+    </div>
+
+    <div class="dropdown" *ngIf="isLoggedIn()">
+      <a routerLink="/eventos" class="dropbtn">Eventos</a>
+      <div class="dropdown-content">
+        <a routerLink="/eventos">Ver Eventos</a>
+        <a routerLink="/cadastrar-evento">Cadastrar Evento</a>
+      </div>
+    </div>
+  </div>
+
+    <div class="nav-group-user" *ngIf="isLoggedIn()">
+    <a routerLink="/interesses-adocao">Interesses de Adoção</a>
+    <div class="dropdown">
+      <span *ngIf="currentUserName" class="dropbtn">Olá, {{ currentUserName }}!</span>
+      <div class="dropdown-content">
+        <a routerLink="/perfil">Meu Perfil</a>
+        <a (click)="logout()">Sair</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-group-auth" *ngIf="!isLoggedIn()">
+  </div>
+</nav>
+<router-outlet></router-outlet>

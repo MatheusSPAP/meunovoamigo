@@ -1,0 +1,199 @@
+.post-detail-container {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+}
+
+.post-detail-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.post-detail-header h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 2.2em;
+}
+
+.post-meta {
+  font-size: 0.95em;
+  color: #666;
+}
+
+.post-content-body {
+  padding: 20px 0;
+  line-height: 1.7;
+  font-size: 1.1em;
+  color: #444;
+}
+
+.post-description {
+  margin-bottom: 20px;
+}
+
+.animal-info-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background-color: #f0f8ff;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e0f2ff;
+  margin-bottom: 25px;
+}
+
+.animal-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #add8e6;
+}
+
+.animal-info-card p {
+  margin: 0;
+  font-size: 1em;
+  color: #333;
+}
+
+.comments-section {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.comments-section h3 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333;
+  font-size: 1.8em;
+}
+
+.no-comments-message {
+  text-align: center;
+  color: #777;
+  margin-bottom: 20px;
+}
+
+.comment-card {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.comment-meta {
+  font-size: 0.85em;
+  color: #888;
+  margin-bottom: 5px;
+}
+
+.comment-message {
+  font-size: 1em;
+  color: #333;
+  line-height: 1.5;
+}
+
+.comment-form-section {
+  margin-top: 30px;
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.comment-form-section h4 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 1.5em;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: bold;
+}
+
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-group textarea:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+button[type="submit"]:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.success-message {
+  background-color: #e8f5e9;
+  color: #388e3c;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.error-message {
+  background-color: #ffe0e0;
+  color: #d32f2f;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.error-text {
+  color: #d32f2f;
+  font-size: 0.9em;
+  margin-top: 5px;
+  text-align: left;
+}
+
+.loading-message {
+  text-align: center;
+  color: #007bff;
+  font-size: 1.2em;
+  padding: 50px 0;
+}

@@ -1,82 +1,205 @@
-const Comentario = require("../models/comentario");
+const ComentarioDb = require('../db/comentarioDb');
+const Comentario = require('../models/comentario');
 
 class ComentarioController {
-    async getComentariosByPublicacao(req, res) {
-        try {
-            const { publicacaoId } = req.params;
-            const comentarios = await Comentario.getByPublicacao(publicacaoId);
-            res.json(comentarios);
-        } catch (error) {
-            console.error("Erro ao buscar comentários:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
-        }
-    }
 
-    async createComentario(req, res) {
+    // Criar novo comentário
+    static async create(req, res) {
         try {
             const { fk_idcomunidade, fk_idusuario, mensagem } = req.body;
-            
-            if (!fk_idcomunidade || !fk_idusuario || !mensagem) {
-                return res.status(400).json({ error: "Todos os campos são obrigatórios" });
+
+            const model = {
+                fk_idcomunidade,
+                fk_idusuario,
+                mensagem,
+                data_comentario: new Date()
+            };
+
+            const errors = Comentario.validate(model);
+            if (errors.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Dados inválidos',
+                    errors: errors
+                });
             }
 
-            const comentario = await Comentario.create(fk_idcomunidade, fk_idusuario, mensagem);
-            res.status(201).json(comentario);
+            const result = await ComentarioDb.insert(model);
+            
+            res.status(201).json({
+                success: true,
+                message: 'Comentário criado com sucesso',
+                data: { id: result.insertId }
+            });
+
         } catch (error) {
-            console.error("Erro ao criar comentário:", error);
-            if (error.message === "Publicação não encontrada" || error.message === "Usuário não encontrado") {
-                return res.status(400).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao criar comentário:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async updateComentario(req, res) {
+    // Listar todos os comentários
+    static async getAll(req, res) {
         try {
-            const { id } = req.params;
-            const { mensagem } = req.body;
-            
-            if (!mensagem) {
-                return res.status(400).json({ error: "Mensagem é obrigatória" });
-            }
+            const comentarios = await ComentarioDb.selectAll();
 
-            const comentario = await Comentario.update(id, mensagem);
-            res.json(comentario);
+            res.status(200).json({
+                success: true,
+                data: comentarios
+            });
+
         } catch (error) {
-            console.error("Erro ao atualizar comentário:", error);
-            if (error.message === "Comentário não encontrado") {
-                return res.status(404).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar comentários:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async deleteComentario(req, res) {
+    // Buscar comentários por postagem
+    static async getByPostagem(req, res) {
         try {
-            const { id } = req.params;
-            
-            const result = await Comentario.delete(id);
-            res.json(result);
+            const { idcomunidade } = req.params;
+            const comentarios = await ComentarioDb.selectByPostagem(idcomunidade);
+
+            res.status(200).json({
+                success: true,
+                data: comentarios
+            });
+
         } catch (error) {
-            console.error("Erro ao deletar comentário:", error);
-            if (error.message === "Comentário não encontrado") {
-                return res.status(404).json({ error: error.message });
-            }
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar comentários por postagem:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 
-    async getComentariosByUsuario(req, res) {
+    // Buscar comentários por usuário
+    static async getByUsuario(req, res) {
         try {
-            const { usuarioId } = req.params;
-            const comentarios = await Comentario.getByUsuario(usuarioId);
-            res.json(comentarios);
+            const { idusuario } = req.params;
+            const comentarios = await ComentarioDb.selectByUsuario(idusuario);
+
+            res.status(200).json({
+                success: true,
+                data: comentarios
+            });
+
         } catch (error) {
-            console.error("Erro ao buscar comentários por usuário:", error);
-            res.status(500).json({ error: "Erro interno do servidor" });
+            console.error('Erro ao buscar comentários por usuário:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    // Buscar comentário específico
+    static async getById(req, res) {
+        try {
+            const { idcomunidade, idusuario, id_comentario } = req.params;
+            const comentario = await ComentarioDb.selectById(idcomunidade, idusuario, id_comentario);
+
+            if (!comentario) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Comentário não encontrado'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                data: comentario
+            });
+
+        } catch (error) {
+            console.error('Erro ao buscar comentário:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    // Atualizar comentário
+    static async update(req, res) {
+        try {
+            const { idcomunidade, idusuario, id_comentario } = req.params;
+            const comentarioData = { 
+                ...req.body, 
+                fk_idcomunidade: idcomunidade,
+                fk_idusuario: idusuario,
+                id_comentario: id_comentario
+            };
+
+            if (!req.body.mensagem || req.body.mensagem.trim() === '') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Mensagem é obrigatória'
+                });
+            }
+
+            // Verificar se comentário existe
+            const existingComentario = await ComentarioDb.selectById(idcomunidade, idusuario, id_comentario);
+            if (!existingComentario) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Comentário não encontrado'
+                });
+            }
+
+            await ComentarioDb.update(comentarioData);
+
+            res.status(200).json({
+                success: true,
+                message: 'Comentário atualizado com sucesso'
+            });
+
+        } catch (error) {
+            console.error('Erro ao atualizar comentário:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    // Deletar comentário
+    static async delete(req, res) {
+        try {
+            const { idcomunidade, idusuario, id_comentario } = req.params;
+
+            // Verificar se comentário existe
+            const existingComentario = await ComentarioDb.selectById(idcomunidade, idusuario, id_comentario);
+            if (!existingComentario) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Comentário não encontrado'
+                });
+            }
+
+            await ComentarioDb.delete(idcomunidade, idusuario, id_comentario);
+
+            res.status(200).json({
+                success: true,
+                message: 'Comentário deletado com sucesso'
+            });
+
+        } catch (error) {
+            console.error('Erro ao deletar comentário:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
         }
     }
 }
 
-module.exports = new ComentarioController();
+module.exports = ComentarioController;
 

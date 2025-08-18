@@ -1,201 +1,163 @@
-const http = require("http");
-const url = require("url");
-const { testConnection, createTables } = require("./src/db/dbConfig");
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
 
-const usuarioRoutes = require("./src/routes/usuarioRoutes");
-const animalRoutes = require("./src/routes/animalRoutes");
-const statusRoutes = require("./src/routes/statusRoutes");
-const eventoRoutes = require("./src/routes/eventoRoutes");
-const publicacaoRoutes = require("./src/routes/publicacaoRoutes"); // Alterado de postagemRoutes
-const comentarioRoutes = require("./src/routes/comentarioRoutes");
-const tipoAnimalRoutes = require("./src/routes/tipoAnimalRoutes"); // Nova rota
-const racaRoutes = require("./src/routes/racaRoutes"); // Nova rota
-const midiaRoutes = require("./src/routes/midiaRoutes"); // Nova rota
+// Importar configuração do banco de dados
+const { testConnection } = require('./src/db/dbConfig');
 
-const PORT = process.env.PORT || 3000;
+// Importar rotas
+const usuarioRoutes = require('./src/routes/usuarioRoutes');
+const statusRoutes = require('./src/routes/statusRoutes');
+const animalRoutes = require('./src/routes/animalRoutes');
+const postagemRoutes = require('./src/routes/postagemRoutes');
+const comentarioRoutes = require('./src/routes/comentarioRoutes');
+const eventoRoutes = require('./src/routes/eventoRoutes');
+const interesseAdocaoRoutes = require('./src/routes/interesseAdocaoRoutes');
+const tipoRoutes = require('./src/routes/tipoRoutes');
+const tamanhoAnimalRoutes = require('./src/routes/tamanhoAnimalRoutes');
+const comportamentoRoutes = require('./src/routes/comportamentoRoutes');
+const midiaRoutes = require('./src/routes/midiaRoutes');
+const racaRoutes = require('./src/routes/racaRoutes');
 
-function setCorsHeaders(res) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-}
+const app = express();
+const PORT = process.env.PORT;
 
-function parseBody(req) {
-    return new Promise((resolve, reject) => {
-        let body = "";
-        req.on("data", chunk => {
-            body += chunk.toString();
-        });
-        req.on("end", () => {
-            try {
-                resolve(body ? JSON.parse(body) : {});
-            } catch (error) {
-                reject(error);
-            }
-        });
+// Middlewares
+app.use(cors({
+    origin: '*', // Permitir todas as origens para desenvolvimento
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Middleware de log para desenvolvimento
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    next();
+});
+
+// Rota de teste
+app.get('/', (req, res) => {
+    res.json({
+        success: true,
+        message: 'API de Adoção de Animais está funcionando!',
+        version: '1.0.0',
+        timestamp: new Date().toISOString()
     });
-}
+});
 
-function sendJSON(res, statusCode, data) {
-    res.writeHead(statusCode, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(data));
-}
-
-async function router(req, res) {
-    setCorsHeaders(res);
-    
-    if (req.method === "OPTIONS") {
-        res.writeHead(200);
-        res.end();
-        return;
-    }
-
-    const parsedUrl = url.parse(req.url, true);
-    const path = parsedUrl.pathname;
-    const method = req.method;
-    
-    const mockReq = {
-        method,
-        url: req.url,
-        params: {},
-        query: parsedUrl.query,
-        body: {}
-    };
-    
-    const mockRes = {
-        json: (data) => sendJSON(res, 200, data),
-        status: (code) => ({
-            json: (data) => sendJSON(res, code, data)
-        })
-    };
-
+// Rota de health check
+app.get('/health', async (req, res) => {
     try {
-        if (method === "POST" || method === "PUT") {
-            mockReq.body = await parseBody(req);
-        }
-
-        const pathParts = path.split("/").filter(part => part);
-        if (pathParts.length >= 3 && !isNaN(pathParts[2])) {
-            mockReq.params.id = pathParts[2];
-        }
-
-        if (path.startsWith("/api/usuarios")) {
-            await usuarioRoutes.handleRequest(mockReq, mockRes);
-        } else if (path.startsWith("/api/animais")) {
-            await animalRoutes.handleRequest(mockReq, mockRes);
-        } else if (path.startsWith("/api/status")) {
-            await statusRoutes.handleRequest(mockReq, mockRes);
-        } else if (path.startsWith("/api/eventos")) {
-            await eventoRoutes.handleRequest(mockReq, mockRes);
-        } else if (path.startsWith("/api/publicacoes")) { // Alterado de postagens
-            await publicacaoRoutes.handleRequest(mockReq, mockRes);
-        } else if (path.startsWith("/api/comentarios")) {
-            await comentarioRoutes.handleRequest(mockReq, mockRes);
-        } else if (path.startsWith("/api/tipos-animais")) { // Nova rota
-            await tipoAnimalRoutes.handleRequest(mockReq, mockRes);
-        } else if (path.startsWith("/api/racas")) { // Nova rota
-            await racaRoutes.handleRequest(mockReq, mockRes);
-        } else if (path.startsWith("/api/midias")) { // Nova rota
-            await midiaRoutes.handleRequest(mockReq, mockRes);
-        } else if (path === "/api/health") {
-            sendJSON(res, 200, { status: "OK", message: "API ouiouiouiofuncionando!" });
-        } else {
-            sendJSON(res, 404, { error: "Endpoint não encontrado" });
-        }
+        const dbConnected = await testConnection();
+        res.json({
+            success: true,
+            status: 'healthy',
+            database: dbConnected ? 'connected' : 'disconnected',
+            timestamp: new Date().toISOString()
+        });
     } catch (error) {
-        console.error("Erro no servidor:", error);
-        sendJSON(res, 500, { error: "Erro interno do servidor" });
+        res.status(500).json({
+            success: false,
+            status: 'unhealthy',
+            database: 'error',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
     }
-}
+});
 
-const server = http.createServer(router);
+// Configurar rotas da API
+app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/status', statusRoutes);
+app.use('/api/animais', animalRoutes);
+app.use('/api/postagens', postagemRoutes);
+app.use('/api/comentarios', comentarioRoutes);
+app.use('/api/eventos', eventoRoutes);
+app.use('/api/interesses-adocao', interesseAdocaoRoutes);
+app.use('/api/tipos', tipoRoutes);
+app.use('/api/tamanhos', tamanhoAnimalRoutes);
+app.use('/api/comportamentos', comportamentoRoutes);
+app.use('/api/midias', midiaRoutes);
+app.use('/api/racas', racaRoutes);
 
+// Middleware de tratamento de erros 404
+app.use('*', (req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'Rota não encontrada',
+        path: req.originalUrl,
+        method: req.method
+    });
+});
+
+// Middleware de tratamento de erros globais
+app.use((error, req, res, next) => {
+    console.error('Erro não tratado:', error);
+    
+    res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor',
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Erro interno'
+    });
+});
+
+// Inicializar servidor
 async function startServer() {
     try {
-        const connected = await testConnection();
-        if (!connected) {
-            console.error("❌ Não foi possível conectar ao banco de dados");
+        // Testar conexão com o banco de dados
+        console.log('🔄 Testando conexão com o banco de dados...');
+        const dbConnected = await testConnection();
+        
+        if (!dbConnected) {
+            console.error('❌ Falha na conexão com o banco de dados. Verifique as configurações.');
             process.exit(1);
         }
 
-        await createTables();
-
-        server.listen(PORT, "0.0.0.0", () => {
-            console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-            console.log("📋 Endpoints disponíveis:");
-            console.log("   GET    /api/health - Status da API");
-            console.log("   GET    /api/usuarios - Listar usuários");
-            console.log("   POST   /api/usuarios - Criar usuário");
-            console.log("   GET    /api/usuarios/:id - Buscar usuário");
-            console.log("   PUT    /api/usuarios/:id - Atualizar usuário");
-            console.log("   DELETE /api/usuarios/:id - Deletar usuário");
-            console.log("   POST   /api/usuarios/login - Login de usuário");
-            console.log("   GET    /api/animais - Listar animais");
-            console.log("   POST   /api/animais - Criar animal");
-            console.log("   GET    /api/animais/:id - Buscar animal");
-            console.log("   PUT    /api/animais/:id - Atualizar animal");
-            console.log("   DELETE /api/animais/:id - Deletar animal");
-            console.log("   GET    /api/animais/status/:status - Listar animais por status");
-            console.log("   GET    /api/animais/tipo/:tipo - Listar animais por tipo");
-            console.log("   GET    /api/animais/localizacao?latitude=&longitude=&radius= - Listar animais por localização");
-            console.log("   GET    /api/status - Listar status");
-            console.log("   POST   /api/status - Criar status");
-            console.log("   GET    /api/status/:id - Buscar status");
-            console.log("   PUT    /api/status/:id - Atualizar status");
-            console.log("   DELETE /api/status/:id - Deletar status");
-            console.log("   GET    /api/eventos - Listar eventos");
-            console.log("   POST   /api/eventos - Criar evento");
-            console.log("   GET    /api/eventos/:id - Buscar evento");
-            console.log("   PUT    /api/eventos/:id - Atualizar evento");
-            console.log("   DELETE /api/eventos/:id - Deletar evento");
-            console.log("   GET    /api/eventos/usuario/:usuarioId - Listar eventos por usuário");
-            console.log("   GET    /api/eventos/tipo/:tipo - Listar eventos por tipo");
-            console.log("   GET    /api/eventos/proximos - Listar próximos eventos");
-            console.log("   GET    /api/publicacoes - Listar publicações");
-            console.log("   POST   /api/publicacoes - Criar publicação");
-            console.log("   GET    /api/publicacoes/:id - Buscar publicação");
-            console.log("   PUT    /api/publicacoes/:id - Atualizar publicação");
-            console.log("   DELETE /api/publicacoes/:id - Deletar publicação");
-            console.log("   GET    /api/publicacoes/usuario/:usuarioId - Listar publicações por usuário");
-            console.log("   GET    /api/publicacoes/animal/:animalId - Listar publicações por animal");
-            console.log("   GET    /api/comentarios/publicacao/:publicacaoId - Listar comentários por publicação");
-            console.log("   POST   /api/comentarios - Criar comentário");
-            console.log("   PUT    /api/comentarios/:id - Atualizar comentário");
-            console.log("   DELETE /api/comentarios/:id - Deletar comentário");
-            console.log("   GET    /api/comentarios/usuario/:usuarioId - Listar comentários por usuário");
-            console.log("   GET    /api/tipos-animais - Listar tipos de animais");
-            console.log("   POST   /api/tipos-animais - Criar tipo de animal");
-            console.log("   GET    /api/tipos-animais/:id - Buscar tipo de animal");
-            console.log("   PUT    /api/tipos-animais/:id - Atualizar tipo de animal");
-            console.log("   DELETE /api/tipos-animais/:id - Deletar tipo de animal");
-            console.log("   GET    /api/racas - Listar raças");
-            console.log("   POST   /api/racas - Criar raça");
-            console.log("   GET    /api/racas/:id - Buscar raça");
-            console.log("   PUT    /api/racas/:id - Atualizar raça");
-            console.log("   DELETE /api/racas/:id - Deletar raça");
-            console.log("   GET    /api/racas/tipo/:tipoId - Listar raças por tipo");
-            console.log("   GET    /api/midias - Listar mídias");
-            console.log("   POST   /api/midias - Criar mídia");
-            console.log("   GET    /api/midias/:id - Buscar mídia");
-            console.log("   PUT    /api/midias/:id - Atualizar mídia");
-            console.log("   DELETE /api/midias/:id - Deletar mídia");
-            console.log("   GET    /api/midias/publicacao/:publicacaoId - Listar mídias por publicação");
-            console.log("   DELETE /api/midias/publicacao/:publicacaoId - Deletar mídias por publicação");
+        // Iniciar servidor
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log('🚀 Servidor iniciado com sucesso!');
+            console.log(`📡 Servidor rodando na porta ${PORT}`);
+            console.log(`🌐 URL: http://localhost:${PORT}`);
+            console.log(`📋 Health check: http://localhost:${PORT}/health`);
+            console.log(`📚 API Base: http://localhost:${PORT}/api`);
+            console.log('');
+            console.log('📋 Rotas disponíveis:');
+            console.log('  - GET  /api/usuarios');
+            console.log('  - POST /api/usuarios');
+            console.log('  - POST /api/usuarios/login');
+            console.log('  - GET  /api/animais');
+            console.log('  - POST /api/animais');
+            console.log('  - GET  /api/postagens');
+            console.log('  - POST /api/postagens');
+            console.log('  - GET  /api/eventos');
+            console.log('  - POST /api/eventos');
+            console.log('  - GET  /api/interesses-adocao');
+            console.log('  - POST /api/interesses-adocao');
+            console.log('  - E muitas outras...');
         });
+
     } catch (error) {
-        console.error("❌ Erro ao iniciar servidor:", error);
+        console.error('❌ Erro ao iniciar servidor:', error);
         process.exit(1);
     }
 }
 
-process.on("SIGINT", () => {
-    console.log("\n🛑 Encerrando servidor...");
-    server.close(() => {
-        console.log("✅ Servidor encerrado");
-        process.exit(0);
-    });
+// Tratamento de sinais de encerramento
+process.on('SIGINT', () => {
+    console.log('\n🛑 Recebido sinal de interrupção. Encerrando servidor...');
+    process.exit(0);
 });
 
+process.on('SIGTERM', () => {
+    console.log('\n🛑 Recebido sinal de término. Encerrando servidor...');
+    process.exit(0);
+});
+
+// Iniciar aplicação
 startServer();
 
+module.exports = app;
 

@@ -1,27 +1,17 @@
-const postagemController = require('../controllers/postagemController');
+const express = require('express');
+const router = express.Router();
+const PostagemController = require('../controllers/postagemController');
 
-const postagemRoutes = {
-    async handleRequest(req, res) {
-        const path = req.url;
-        const method = req.method;
-        
-        if (path.startsWith('/api/postagens')) {
-            if (method === 'GET' && !req.params.id) {
-                await postagemController.getAllPostagens(req, res);
-            } else if (method === 'GET' && req.params.id) {
-                await postagemController.getPostagemById(req, res);
-            } else if (method === 'POST') {
-                await postagemController.createPostagem(req, res);
-            } else if (method === 'PUT' && req.params.id) {
-                await postagemController.updatePostagem(req, res);
-            } else if (method === 'DELETE' && req.params.id) {
-                await postagemController.deletePostagem(req, res);
-            } else {
-                res.status(404).json({ error: 'Rota não encontrada' });
-            }
-        }
-    }
-};
+// Rotas para postagens
+router.post('/', PostagemController.create);                        // POST /postagens - Criar postagem
+router.get('/', PostagemController.getAll);                         // GET /postagens - Listar todas as postagens
+router.get('/:id', PostagemController.getById);                     // GET /postagens/:id - Buscar postagem por ID
+router.put('/:id', PostagemController.update);                      // PUT /postagens/:id - Atualizar postagem
+router.delete('/:id', PostagemController.delete);                   // DELETE /postagens/:id - Deletar postagem
 
-module.exports = postagemRoutes;
+// Rotas especiais para filtros
+router.get('/usuario/:idusuario', PostagemController.getByUsuario); // GET /postagens/usuario/:idusuario - Buscar postagens por usuário
+router.get('/animal/:idAnimal', PostagemController.getByAnimal);    // GET /postagens/animal/:idAnimal - Buscar postagens por animal
+
+module.exports = router;
 
