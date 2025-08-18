@@ -4,6 +4,21 @@ import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angula
 import { UsuarioService } from '../usuario.service';
 import { Router } from '@angular/router';
 
+// Interfaces para definir a "forma" dos nossos formulários
+interface LoginFormValue {
+  email: string | null;
+  senha: string | null;
+}
+
+interface RegistroFormValue {
+  nome: string | null;
+  email: string | null;
+  senha: string | null;
+  telefone: string | null;
+  cidade: string | null;
+  endereco: string | null;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -12,8 +27,10 @@ import { Router } from '@angular/router';
   styleUrls: ['./home.css']
 })
 export class HomeComponent implements OnInit {
-  loginForm: FormGroup;
-  registroForm: FormGroup;
+  // As propriedades do formulário agora usam as interfaces que definimos
+  loginForm: FormGroup<LoginFormValue>;
+  registroForm: FormGroup<RegistroFormValue>;
+
   showLoginForm: boolean = true;
   loginErrorMessage: string = '';
   registroErrorMessage: string = '';
@@ -53,6 +70,7 @@ export class HomeComponent implements OnInit {
   onSubmitLogin(): void {
     this.loginErrorMessage = '';
     if (this.loginForm.valid) {
+      // O .value aqui é fortemente tipado! TypeScript sabe que ele tem .email e .senha
       this.usuarioService.login(this.loginForm.value).subscribe({
         next: (response) => {
           if (response.success) {
