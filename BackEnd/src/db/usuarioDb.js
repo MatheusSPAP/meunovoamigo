@@ -106,6 +106,37 @@ class UsuarioDb {
             throw error;
         }
     }
+
+    static async updateUserPassword(id, currentPassword, newPassword) {
+        const conn = await db.connect();
+        try {
+            const [users] = await conn.execute('SELECT senha FROM usuario WHERE idusuario = ?', [id]);
+            const user = users[0];
+
+            if (!user) {
+                conn.release();
+                return { success: false, message: 'Usuário não encontrado.' };
+            }
+
+            // Comparação de senha em texto puro (INSEGURO - APENAS PARA DEMONSTRAÇÃO)
+            if (user.senha !== currentPassword) {
+                conn.release();
+                return { success: false, message: 'Senha atual incorreta.' };
+            }
+
+            // Atualiza a senha em texto puro (INSEGURO - APENAS PARA DEMONSTRAÇÃO)
+            const updateQuery = 'UPDATE usuario SET senha = ? WHERE idusuario = ?';
+            await conn.execute(updateQuery, [newPassword, id]);
+
+            conn.release();
+            return { success: true, message: 'Senha atualizada com sucesso.' };
+
+        } catch (error) {
+            conn.release();
+            console.error('Erro no banco de dados ao atualizar senha:', error);
+            return { success: false, message: 'Erro interno do servidor ao atualizar senha.' };
+        }
+    }
 }
 
 module.exports = UsuarioDb;

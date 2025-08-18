@@ -49,7 +49,7 @@ export class UsuarioService {
         if (response.success && response.data && response.data.idusuario) {
           localStorage.setItem('currentUserId', response.data.idusuario);
           this._isLoggedIn.next(true);
-          // O nome do usuário será buscado no app.component após o login
+          this._currentUserName.next(response.data.nome); // Set the user's name here
         }
       })
     );

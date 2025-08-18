@@ -210,6 +210,36 @@ class UsuarioController {
             });
         }
     }
+
+    // Atualizar senha do usuário
+    static async updateUserPassword(req, res) {
+        try {
+            const { id } = req.params;
+            const { currentPassword, newPassword } = req.body;
+
+            if (!currentPassword || !newPassword) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Senha atual e nova senha são obrigatórias.'
+                });
+            }
+
+            const result = await UsuarioDb.updateUserPassword(id, currentPassword, newPassword);
+
+            if (result.success) {
+                res.status(200).json(result);
+            } else {
+                res.status(400).json(result);
+            }
+
+        } catch (error) {
+            console.error('Erro ao atualizar senha do usuário:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
 }
 
 module.exports = UsuarioController;
