@@ -42,6 +42,10 @@ export class UsuarioService {
     return this.http.put(`${this.apiUrl}/${userId}`, userData);
   }
 
+  updateUserPassword(userId: number, currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${userId}/password`, { currentPassword, newPassword });
+  }
+
   isLoggedIn(): boolean {
     return this._isLoggedIn.value;
   }
