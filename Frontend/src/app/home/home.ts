@@ -4,19 +4,18 @@ import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angula
 import { UsuarioService } from '../usuario.service';
 import { Router } from '@angular/router';
 
-// Interfaces para definir a "forma" dos nossos formulários
 interface LoginFormValue {
-  email: string | null;
-  senha: string | null;
+  email: string;
+  senha: string;
 }
 
 interface RegistroFormValue {
-  nome: string | null;
-  email: string | null;
-  senha: string | null;
-  telefone: string | null;
-  cidade: string | null;
-  endereco: string | null;
+  nome: string;
+  email: string;
+  senha: string;
+  telefone: string;
+  cidade: string;
+  endereco: string;
 }
 
 @Component({
@@ -27,9 +26,8 @@ interface RegistroFormValue {
   styleUrls: ['./home.css']
 })
 export class HomeComponent implements OnInit {
-  // As propriedades do formulário agora usam as interfaces que definimos
-  loginForm: FormGroup<LoginFormValue>;
-  registroForm: FormGroup<RegistroFormValue>;
+  loginForm: FormGroup;
+  registroForm: FormGroup;
 
   showLoginForm: boolean = true;
   loginErrorMessage: string = '';
@@ -41,23 +39,22 @@ export class HomeComponent implements OnInit {
     private router: Router
   ) {
     this.loginForm = new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email]),
-      senha: new FormControl('', [Validators.required])
+      email: new FormControl('', { validators: [Validators.required, Validators.email], nonNullable: true }),
+      senha: new FormControl('', { validators: [Validators.required], nonNullable: true })
     });
 
+    // A estrutura do FormGroup espera um objeto de FormControls. A tipagem explícita aqui resolve a ambiguidade.
     this.registroForm = new FormGroup({
-      nome: new FormControl('', [Validators.required]),
-      email: new FormControl('', [Validators.required, Validators.email]),
-      senha: new FormControl('', [Validators.required]),
-      telefone: new FormControl('', [Validators.required]),
-      cidade: new FormControl('', [Validators.required]),
-      endereco: new FormControl('', [Validators.required])
+      nome: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      email: new FormControl('', { validators: [Validators.required, Validators.email], nonNullable: true }),
+      senha: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      telefone: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      cidade: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      endereco: new FormControl('', { validators: [Validators.required], nonNullable: true })
     });
   }
 
-  ngOnInit(): void {
-    // A lógica de redirecionamento foi removida. O AuthGuard agora é o único responsável por proteger as rotas.
-  }
+  ngOnInit(): void {}
 
   toggleForm(): void {
     this.showLoginForm = !this.showLoginForm;
@@ -70,8 +67,7 @@ export class HomeComponent implements OnInit {
   onSubmitLogin(): void {
     this.loginErrorMessage = '';
     if (this.loginForm.valid) {
-      // O .value aqui é fortemente tipado! TypeScript sabe que ele tem .email e .senha
-      this.usuarioService.login(this.loginForm.value).subscribe({
+      this.usuarioService.login(this.loginForm.getRawValue()).subscribe({
         next: (response) => {
           if (response.success) {
             this.router.navigate(['/dashboard']);
@@ -91,12 +87,12 @@ export class HomeComponent implements OnInit {
 
   onSubmitRegistro(): void {
     this.registroErrorMessage = '';
-    this.registroSuccessMessage = ''; // Limpa a mensagem de sucesso
+    this.registroSuccessMessage = '';
     if (this.registroForm.valid) {
-      this.usuarioService.registrarUsuario(this.registroForm.value).subscribe({
+      this.usuarioService.registrarUsuario(this.registroForm.getRawValue()).subscribe({
         next: (response) => {
           if (response.success) {
-            this.toggleForm(); // Alterna para o formulário de login
+            this.toggleForm();
             this.registroSuccessMessage = 'Registro realizado com sucesso! Faça o login para continuar.';
           }
         },
