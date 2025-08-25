@@ -1,6 +1,5 @@
 class Midia {
-    constructor(idmidia, nome_arquivo, tipo, tamanho, caminho, data_upload, 
-                postagem_idcomunidade, postagem_animal_idAnimal, postagem_usuario_idusuario) {
+    constructor(idmidia, nome_arquivo, tipo, tamanho, caminho, data_upload, postagem_idcomunidade) {
         this.idmidia = idmidia;
         this.nome_arquivo = nome_arquivo;
         this.tipo = tipo;
@@ -8,8 +7,6 @@ class Midia {
         this.caminho = caminho;
         this.data_upload = data_upload;
         this.postagem_idcomunidade = postagem_idcomunidade;
-        this.postagem_animal_idAnimal = postagem_animal_idAnimal;
-        this.postagem_usuario_idusuario = postagem_usuario_idusuario;
     }
 
     // Método para validar dados obrigatórios
@@ -19,33 +16,20 @@ class Midia {
         if (!data.nome_arquivo || data.nome_arquivo.trim() === '') {
             errors.push('Nome do arquivo é obrigatório');
         }
-
         if (!data.tipo || data.tipo.trim() === '') {
             errors.push('Tipo é obrigatório');
         }
-
         if (!data.tamanho || data.tamanho <= 0) {
             errors.push('Tamanho deve ser maior que zero');
         }
-
         if (!data.caminho || data.caminho.trim() === '') {
             errors.push('Caminho é obrigatório');
         }
-
         if (!data.data_upload) {
             errors.push('Data de upload é obrigatória');
         }
-
         if (!data.postagem_idcomunidade) {
             errors.push('ID da postagem é obrigatório');
-        }
-
-        if (!data.postagem_animal_idAnimal) {
-            errors.push('ID do animal da postagem é obrigatório');
-        }
-
-        if (!data.postagem_usuario_idusuario) {
-            errors.push('ID do usuário da postagem é obrigatório');
         }
 
         // Validação dos valores permitidos para tipo
@@ -58,7 +42,6 @@ class Midia {
         if (data.nome_arquivo && data.nome_arquivo.length > 255) {
             errors.push('Nome do arquivo deve ter no máximo 255 caracteres');
         }
-
         if (data.caminho && data.caminho.length > 512) {
             errors.push('Caminho deve ter no máximo 512 caracteres');
         }
@@ -75,9 +58,7 @@ class Midia {
             row.tamanho,
             row.caminho,
             row.data_upload,
-            row.postagem_idcomunidade,
-            row.postagem_animal_idAnimal,
-            row.postagem_usuario_idusuario
+            row.postagem_idcomunidade
         );
     }
 
@@ -90,12 +71,9 @@ class Midia {
             tamanho: this.tamanho,
             caminho: this.caminho,
             data_upload: this.data_upload,
-            postagem_idcomunidade: this.postagem_idcomunidade,
-            postagem_animal_idAnimal: this.postagem_animal_idAnimal,
-            postagem_usuario_idusuario: this.postagem_usuario_idusuario
+            postagem_idcomunidade: this.postagem_idcomunidade
         };
     }
 }
 
 module.exports = Midia;
-

@@ -2,8 +2,9 @@ const db = require('./dbConfig');
 
 class PostagemDb {
 
-    static async insert(model) {
-        const conn = await db.connect();
+    static async insert(model, connection = null) {
+        const newConnection = !connection;
+        const conn = newConnection ? await db.connect() : connection;
 
         const descricao = model.descricao;
         const data_postagem = model.data_postagem;
@@ -15,10 +16,10 @@ class PostagemDb {
 
         try {
             const [result] = await conn.execute(query, [descricao, data_postagem, titulo, animal_idAnimal, usuario_idusuario]);
-            conn.release();
+            if (newConnection) conn.release();
             return result;
         } catch (error) {
-            conn.release();
+            if (newConnection) conn.release();
             throw error;
         }
     }

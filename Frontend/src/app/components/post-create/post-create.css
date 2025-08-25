@@ -31,11 +31,16 @@
 
 .post-create-container input[type="text"],
 .post-create-container textarea,
-.post-create-container select {
-  width: calc(100% - 22px);
+.post-create-container select,
+.post-create-container input[type="file"] {
+  width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.post-create-container textarea {
   resize: vertical;
 }
 
@@ -66,4 +71,18 @@
   color: red;
   margin-bottom: 15px;
   text-align: center;
+}
+
+.image-preview-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 250px;
+  border-radius: 8px;
+  border: 2px dashed #ccc;
+  padding: 5px;
+  object-fit: cover;
 }

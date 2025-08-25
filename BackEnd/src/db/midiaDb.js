@@ -2,29 +2,21 @@ const db = require('./dbConfig');
 
 class MidiaDb {
 
-    static async insert(model) {
-        const conn = await db.connect();
+    static async insert(model, connection = null) {
+        const newConnection = !connection;
+        const conn = newConnection ? await db.connect() : connection;
 
-        const nome_arquivo = model.nome_arquivo;
-        const tipo = model.tipo;
-        const tamanho = model.tamanho;
-        const caminho = model.caminho;
-        const data_upload = model.data_upload;
-        const postagem_idcomunidade = model.postagem_idcomunidade;
-        const postagem_animal_idAnimal = model.postagem_animal_idAnimal;
-        const postagem_usuario_idusuario = model.postagem_usuario_idusuario;
+        const { nome_arquivo, tipo, tamanho, caminho, data_upload, postagem_idcomunidade } = model;
 
-        const query = `INSERT INTO midia (nome_arquivo, tipo, tamanho, caminho, data_upload, 
-                       postagem_idcomunidade, postagem_animal_idAnimal, postagem_usuario_idusuario) 
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        const query = `INSERT INTO midia (nome_arquivo, tipo, tamanho, caminho, data_upload, postagem_idcomunidade) 
+                       VALUES (?, ?, ?, ?, ?, ?)`;
 
         try {
-            const [result] = await conn.execute(query, [nome_arquivo, tipo, tamanho, caminho, data_upload, 
-                postagem_idcomunidade, postagem_animal_idAnimal, postagem_usuario_idusuario]);
-            conn.release();
+            const [result] = await conn.execute(query, [nome_arquivo, tipo, tamanho, caminho, data_upload, postagem_idcomunidade]);
+            if (newConnection) conn.release();
             return result;
         } catch (error) {
-            conn.release();
+            if (newConnection) conn.release();
             throw error;
         }
     }

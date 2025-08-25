@@ -5,6 +5,8 @@ import { PostService } from '../../services/post.service';
 import { Post } from '../../models/post.model';
 import { ComentarioService } from '../../services/comentario.service';
 import { Comentario } from '../../models/comentario.model';
+import { MidiaService } from '../../services/midia.service';
+import { Midia } from '../../models/midia.model';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { UsuarioService } from '../../usuario.service';
 
@@ -18,14 +20,17 @@ import { UsuarioService } from '../../usuario.service';
 export class PostDetailComponent implements OnInit {
   post: Post | undefined;
   comentarios: Comentario[] = [];
+  medias: Midia[] = [];
   comentarioForm: FormGroup;
   successMessage: string = '';
   errorMessage: string = '';
+  apiBaseUrl = 'http://localhost:3000'; // Base URL for media files
 
   constructor(
     private route: ActivatedRoute,
     private postService: PostService,
     private comentarioService: ComentarioService,
+    private midiaService: MidiaService,
     private usuarioService: UsuarioService
   ) {
     this.comentarioForm = new FormGroup({
@@ -38,8 +43,9 @@ export class PostDetailComponent implements OnInit {
       const id = Number(params.get('id'));
       if (id) {
         this.postService.getPostById(id).subscribe((response: any) => {
-          this.post = response.data; // Assuming the backend returns { data: Post }
+          this.post = response.data;
           this.loadComentarios(id);
+          this.loadMedias(id);
         });
       }
     });
@@ -52,7 +58,19 @@ export class PostDetailComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erro ao carregar comentários:', error);
-        this.errorMessage = 'Erro ao carregar comentários.';
+      }
+    });
+  }
+
+  loadMedias(postId: number): void {
+    this.midiaService.getMidiasByPostId(postId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.medias = response.data;
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao carregar mídias:', error);
       }
     });
   }
@@ -76,13 +94,11 @@ export class PostDetailComponent implements OnInit {
 
       this.comentarioService.createComentario(comentarioData).subscribe({
         next: (response) => {
-          console.log('Comentário adicionado com sucesso!', response);
           this.successMessage = 'Comentário adicionado com sucesso!';
           this.comentarioForm.reset();
           this.loadComentarios(this.post!.idcomunidade);
         },
         error: (error) => {
-          console.error('Erro ao adicionar comentário!', error);
           this.errorMessage = error.error.message || 'Erro ao adicionar comentário. Tente novamente.';
         }
       });

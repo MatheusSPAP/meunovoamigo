@@ -19,6 +19,8 @@ export class PostCreateComponent implements OnInit {
   successMessage: string = '';
   errorMessage: string = '';
   userAnimals: Animal[] = [];
+  selectedFile: File | null = null;
+  imagePreview: string | ArrayBuffer | null = null;
 
   constructor(
     private postService: PostService,
@@ -29,7 +31,7 @@ export class PostCreateComponent implements OnInit {
     this.postForm = new FormGroup({
       titulo: new FormControl('', [Validators.required, Validators.maxLength(45)]),
       descricao: new FormControl('', [Validators.required, Validators.maxLength(255)]),
-      animal_idAnimal: new FormControl('')
+      animal_idAnimal: new FormControl(null)
     });
   }
 
@@ -54,37 +56,67 @@ export class PostCreateComponent implements OnInit {
     }
   }
 
+  onFileSelected(event: Event): void {
+    const element = event.currentTarget as HTMLInputElement;
+    let fileList: FileList | null = element.files;
+    if (fileList && fileList.length > 0) {
+      this.selectedFile = fileList[0];
+      
+      // Gerar preview da imagem
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreview = reader.result;
+      };
+      reader.readAsDataURL(this.selectedFile);
+
+    } else {
+      this.selectedFile = null;
+      this.imagePreview = null;
+    }
+  }
+
   onSubmit(): void {
     this.successMessage = '';
     this.errorMessage = '';
 
-    if (this.postForm.valid) {
-      const userId = localStorage.getItem('currentUserId');
-      if (!userId) {
-        this.errorMessage = 'Você precisa estar logado para criar uma postagem.';
-        return;
-      }
-
-      const postData = {
-        ...this.postForm.value,
-        usuario_idusuario: Number(userId),
-        data_postagem: new Date().toISOString().slice(0, 10) // Add data_postagem
-      };
-
-      this.postService.createPost(postData).subscribe({
-        next: (response) => {
-          console.log('Postagem criada com sucesso!', response);
-          this.successMessage = 'Postagem criada com sucesso!';
-          this.postForm.reset();
-          this.router.navigate(['/postagens']);
-        },
-        error: (error) => {
-          console.error('Erro ao criar postagem!', error);
-          this.errorMessage = error.error.message || 'Erro ao criar postagem. Tente novamente.';
-        }
-      });
-    } else {
+    if (this.postForm.invalid) {
       this.errorMessage = 'Por favor, preencha todos os campos obrigatórios.';
+      return;
     }
+
+    const userId = localStorage.getItem('currentUserId');
+    if (!userId) {
+      this.errorMessage = 'Você precisa estar logado para criar uma postagem.';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('titulo', this.postForm.get('titulo')!.value);
+    formData.append('descricao', this.postForm.get('descricao')!.value);
+    formData.append('usuario_idusuario', userId);
+
+    const animalId = this.postForm.get('animal_idAnimal')!.value;
+    if (animalId) {
+      formData.append('animal_idAnimal', animalId);
+    }
+
+    if (this.selectedFile) {
+      formData.append('arquivo', this.selectedFile, this.selectedFile.name);
+    }
+
+    this.postService.createPost(formData).subscribe({
+      next: (response) => {
+        console.log('Postagem criada com sucesso!', response);
+        this.successMessage = 'Postagem criada com sucesso!';
+        this.postForm.reset();
+        this.imagePreview = null;
+        // Redirecionar após um pequeno atraso para o usuário ver a mensagem
+        setTimeout(() => this.router.navigate(['/postagens']), 1500);
+      },
+      error: (error) => {
+        console.error('Erro ao criar postagem!', error);
+        this.errorMessage = error.error.message || 'Erro ao criar postagem. Tente novamente.';
+      }
+    });
   }
 }
