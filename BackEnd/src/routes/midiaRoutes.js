@@ -1,196 +1,32 @@
 const express = require('express');
 const router = express.Router();
-const MidiaDb = require('../db/midiaDb');
-const Midia = require('../models/midia');
-
-// Controller simples inline para Midia
-class MidiaController {
-    static async create(req, res) {
-        try {
-            const errors = Midia.validate(req.body);
-            if (errors.length > 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Dados inválidos',
-                    errors: errors
-                });
-            }
-
-            const result = await MidiaDb.insert(req.body);
-            
-            res.status(201).json({
-                success: true,
-                message: 'Mídia criada com sucesso',
-                data: { id: result.insertId }
-            });
-
-        } catch (error) {
-            console.error('Erro ao criar mídia:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Erro interno do servidor'
-            });
-        }
-    }
-
-    static async getAll(req, res) {
-        try {
-            const midias = await MidiaDb.selectAll();
-
-            res.status(200).json({
-                success: true,
-                data: midias
-            });
-
-        } catch (error) {
-            console.error('Erro ao buscar mídias:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Erro interno do servidor'
-            });
-        }
-    }
-
-    static async getById(req, res) {
-        try {
-            const { id } = req.params;
-            const midia = await MidiaDb.selectById(id);
-
-            if (!midia) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Mídia não encontrada'
-                });
-            }
-
-            res.status(200).json({
-                success: true,
-                data: midia
-            });
-
-        } catch (error) {
-            console.error('Erro ao buscar mídia:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Erro interno do servidor'
-            });
-        }
-    }
-
-    static async getByPostagem(req, res) {
-        try {
-            const { idcomunidade } = req.params;
-            const midias = await MidiaDb.selectByPostagem(idcomunidade);
-
-            res.status(200).json({
-                success: true,
-                data: midias
-            });
-
-        } catch (error) {
-            console.error('Erro ao buscar mídias por postagem:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Erro interno do servidor'
-            });
-        }
-    }
-
-    static async getByTipo(req, res) {
-        try {
-            const { tipo } = req.params;
-            const midias = await MidiaDb.selectByTipo(tipo);
-
-            res.status(200).json({
-                success: true,
-                data: midias
-            });
-
-        } catch (error) {
-            console.error('Erro ao buscar mídias por tipo:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Erro interno do servidor'
-            });
-        }
-    }
-
-    static async update(req, res) {
-        try {
-            const { id } = req.params;
-            const midiaData = { ...req.body, idmidia: id };
-
-            // Validar apenas os campos que podem ser atualizados
-            if (!req.body.nome_arquivo || req.body.nome_arquivo.trim() === '') {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Nome do arquivo é obrigatório'
-                });
-            }
-
-            const existingMidia = await MidiaDb.selectById(id);
-            if (!existingMidia) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Mídia não encontrada'
-                });
-            }
-
-            await MidiaDb.update(midiaData);
-
-            res.status(200).json({
-                success: true,
-                message: 'Mídia atualizada com sucesso'
-            });
-
-        } catch (error) {
-            console.error('Erro ao atualizar mídia:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Erro interno do servidor'
-            });
-        }
-    }
-
-    static async delete(req, res) {
-        try {
-            const { id } = req.params;
-
-            const existingMidia = await MidiaDb.selectById(id);
-            if (!existingMidia) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Mídia não encontrada'
-                });
-            }
-
-            await MidiaDb.delete(id);
-
-            res.status(200).json({
-                success: true,
-                message: 'Mídia deletada com sucesso'
-            });
-
-        } catch (error) {
-            console.error('Erro ao deletar mídia:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Erro interno do servidor'
-            });
-        }
-    }
-}
+const MidiaController = require('../controllers/midiaController');
+const upload = require('../middleware/upload');
 
 // Rotas para mídias
-router.post('/', MidiaController.create);                        // POST /midias - Criar mídia
-router.get('/', MidiaController.getAll);                         // GET /midias - Listar todas as mídias
-router.get('/:id', MidiaController.getById);                     // GET /midias/:id - Buscar mídia por ID
-router.put('/:id', MidiaController.update);                      // PUT /midias/:id - Atualizar mídia
-router.delete('/:id', MidiaController.delete);                   // DELETE /midias/:id - Deletar mídia
 
-// Rotas especiais para filtros
-router.get('/postagem/:idcomunidade', MidiaController.getByPostagem); // GET /midias/postagem/:idcomunidade - Buscar mídias por postagem
-router.get('/tipo/:tipo', MidiaController.getByTipo);                  // GET /midias/tipo/:tipo - Buscar mídias por tipo
+// POST /midias - Cria uma nova mídia com upload de arquivo
+// O middleware 'upload.single('arquivo')' processa o upload do arquivo antes de chamar o controller.
+// O nome 'arquivo' deve corresponder ao nome do campo no formulário do frontend.
+router.post('/', upload.single('arquivo'), MidiaController.create);
+
+// GET /midias - Lista todas as mídias
+router.get('/', MidiaController.getAll);
+
+// GET /midias/:id - Busca uma mídia específica por ID
+router.get('/:id', MidiaController.getById);
+
+// PUT /midias/:id - Atualiza uma mídia existente
+// Note: A rota PUT foi removida na nova versão, pois a lógica de atualização pode ter sido movida ou alterada.
+
+// DELETE /midias/:id - Deleta uma mídia e o arquivo associado
+router.delete('/:id', MidiaController.delete);
+
+// GET /midias/postagem/:idcomunidade - Busca todas as mídias associadas a uma postagem
+router.get('/postagem/:idcomunidade', MidiaController.getByPostagem);
+
+// GET /midias/tipo/:tipo - Busca todas as mídias por tipo
+// Note: A rota GET /midias/tipo/:tipo foi removida na nova versão.
 
 module.exports = router;
 
