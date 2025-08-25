@@ -4,6 +4,20 @@ import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angula
 import { UsuarioService } from '../usuario.service';
 import { Router } from '@angular/router';
 
+interface LoginFormValue {
+  email: string;
+  senha: string;
+}
+
+interface RegistroFormValue {
+  nome: string;
+  email: string;
+  senha: string;
+  telefone: string;
+  cidade: string;
+  endereco: string;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -14,35 +28,33 @@ import { Router } from '@angular/router';
 export class HomeComponent implements OnInit {
   loginForm: FormGroup;
   registroForm: FormGroup;
+
   showLoginForm: boolean = true;
   loginErrorMessage: string = '';
   registroErrorMessage: string = '';
+  registroSuccessMessage: string = '';
 
   constructor(
     private usuarioService: UsuarioService,
     private router: Router
   ) {
     this.loginForm = new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email]),
-      senha: new FormControl('', [Validators.required])
+      email: new FormControl('', { validators: [Validators.required, Validators.email], nonNullable: true }),
+      senha: new FormControl('', { validators: [Validators.required], nonNullable: true })
     });
 
+    // A estrutura do FormGroup espera um objeto de FormControls. A tipagem explícita aqui resolve a ambiguidade.
     this.registroForm = new FormGroup({
-      nome: new FormControl('', [Validators.required]),
-      email: new FormControl('', [Validators.required, Validators.email]),
-      senha: new FormControl('', [Validators.required]),
-      telefone: new FormControl('', [Validators.required]),
-      cidade: new FormControl('', [Validators.required]),
-      endereco: new FormControl('', [Validators.required])
+      nome: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      email: new FormControl('', { validators: [Validators.required, Validators.email], nonNullable: true }),
+      senha: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      telefone: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      cidade: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      endereco: new FormControl('', { validators: [Validators.required], nonNullable: true })
     });
   }
 
-  ngOnInit(): void {
-    // Se o usuário já estiver logado, redireciona para o dashboard
-    if (this.usuarioService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
-    }
-  }
+  ngOnInit(): void {}
 
   toggleForm(): void {
     this.showLoginForm = !this.showLoginForm;
@@ -55,7 +67,7 @@ export class HomeComponent implements OnInit {
   onSubmitLogin(): void {
     this.loginErrorMessage = '';
     if (this.loginForm.valid) {
-      this.usuarioService.login(this.loginForm.value).subscribe({
+      this.usuarioService.login(this.loginForm.getRawValue()).subscribe({
         next: (response) => {
           if (response.success) {
             this.router.navigate(['/dashboard']);
@@ -75,11 +87,13 @@ export class HomeComponent implements OnInit {
 
   onSubmitRegistro(): void {
     this.registroErrorMessage = '';
+    this.registroSuccessMessage = '';
     if (this.registroForm.valid) {
-      this.usuarioService.registrarUsuario(this.registroForm.value).subscribe({
+      this.usuarioService.registrarUsuario(this.registroForm.getRawValue()).subscribe({
         next: (response) => {
           if (response.success) {
-            this.router.navigate(['/dashboard']); // Ou redirecionar para login
+            this.toggleForm();
+            this.registroSuccessMessage = 'Registro realizado com sucesso! Faça o login para continuar.';
           }
         },
         error: (error) => {

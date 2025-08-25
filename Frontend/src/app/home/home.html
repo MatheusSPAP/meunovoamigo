@@ -9,6 +9,9 @@
 
   <div *ngIf="showLoginForm" class="form-section">
     <h2>Login</h2>
+    <div *ngIf="registroSuccessMessage" class="success-message">
+      {{ registroSuccessMessage }}
+    </div>
     <form [formGroup]="loginForm" (ngSubmit)="onSubmitLogin()">
       <div>
         <label for="loginEmail">Email:</label>

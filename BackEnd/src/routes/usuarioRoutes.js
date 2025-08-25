@@ -12,5 +12,7 @@ router.delete('/:id', UsuarioController.delete);      // DELETE /usuarios/:id - 
 // Rota especial para login
 router.post('/login', UsuarioController.login);       // POST /usuarios/login - Login
 
+router.patch('/:id/password', UsuarioController.updateUserPassword);
+
 module.exports = router;
 

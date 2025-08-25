@@ -2,7 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UsuarioService } from '../../usuario.service';
 import { Router } from '@angular/router';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators, ValidationErrors, AbstractControl } from '@angular/forms';
+
+// Custom Validator for password matching
+export function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+  const newPassword = control.get('newPassword');
+  const confirmPassword = control.get('confirmPassword');
+  return newPassword && confirmPassword && newPassword.value !== confirmPassword.value ? { passwordMismatch: true } : null;
+}
 
 @Component({
   selector: 'app-user-profile',
@@ -17,6 +24,7 @@ export class UserProfileComponent implements OnInit {
   successMessage: string = '';
   isEditMode: boolean = false;
   profileForm: FormGroup;
+  passwordForm: FormGroup;
 
   constructor(
     private usuarioService: UsuarioService,
@@ -29,6 +37,12 @@ export class UserProfileComponent implements OnInit {
       cidade: new FormControl('', [Validators.required]),
       endereco: new FormControl('', [Validators.required])
     });
+
+    this.passwordForm = new FormGroup({
+      currentPassword: new FormControl('', [Validators.required]),
+      newPassword: new FormControl('', [Validators.required]),
+      confirmPassword: new FormControl('', [Validators.required])
+    }, { validators: passwordMatchValidator });
   }
 
   ngOnInit(): void {
@@ -42,14 +56,7 @@ export class UserProfileComponent implements OnInit {
         next: (response) => {
           if (response.success && response.data) {
             this.user = response.data;
-            // Populate the form with current user data
-            this.profileForm.patchValue({
-              nome: this.user.nome,
-              email: this.user.email,
-              telefone: this.user.telefone,
-              cidade: this.user.cidade,
-              endereco: this.user.endereco
-            });
+            this.profileForm.patchValue(this.user);
           } else {
             this.errorMessage = response.message || 'Erro ao carregar perfil.';
           }
@@ -70,14 +77,7 @@ export class UserProfileComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
     if (!this.isEditMode && this.user) {
-      // If exiting edit mode, reset form to original user data
-      this.profileForm.patchValue({
-        nome: this.user.nome,
-        email: this.user.email,
-        telefone: this.user.telefone,
-        cidade: this.user.cidade,
-        endereco: this.user.endereco
-      });
+      this.profileForm.patchValue(this.user);
     }
   }
 
@@ -92,16 +92,12 @@ export class UserProfileComponent implements OnInit {
         return;
       }
 
-      const updatedData = {
-        ...this.profileForm.value,
-      };
-
-      this.usuarioService.updateUserProfile(Number(userId), updatedData).subscribe({
+      this.usuarioService.updateUserProfile(Number(userId), this.profileForm.value).subscribe({
         next: (response) => {
           if (response.success) {
             this.successMessage = 'Perfil atualizado com sucesso!';
-            this.isEditMode = false; // Exit edit mode
-            this.loadUserProfile(); // Reload user data to ensure consistency
+            this.isEditMode = false;
+            this.loadUserProfile();
           } else {
             this.errorMessage = response.message || 'Erro ao atualizar perfil.';
           }
@@ -113,6 +109,41 @@ export class UserProfileComponent implements OnInit {
       });
     } else {
       this.errorMessage = 'Por favor, preencha todos os campos corretamente.';
+    }
+  }
+
+  onSubmitPassword(): void {
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    if (this.passwordForm.valid && this.user) {
+      const userId = localStorage.getItem('currentUserId');
+      if (!userId) {
+        this.errorMessage = 'Erro: ID do usuário não encontrado.';
+        return;
+      }
+
+      const passwords = {
+        currentPassword: this.passwordForm.value.currentPassword,
+        newPassword: this.passwordForm.value.newPassword
+      };
+
+      this.usuarioService.updateUserPassword(Number(userId), this.passwordForm.value.currentPassword, this.passwordForm.value.newPassword).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.successMessage = 'Senha alterada com sucesso!';
+            this.passwordForm.reset();
+          } else {
+            this.errorMessage = response.message || 'Erro ao alterar a senha.';
+          }
+        },
+        error: (error) => {
+          console.error('Erro ao alterar a senha!', error);
+          this.errorMessage = error.error.message || 'Erro ao alterar a senha. Tente novamente.';
+        }
+      });
+    } else {
+      this.errorMessage = 'Por favor, preencha todos os campos de senha corretamente.';
     }
   }
 }
