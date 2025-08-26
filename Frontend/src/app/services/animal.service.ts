@@ -19,8 +19,8 @@ export class AnimalService {
     return this.http.get<Animal>(`${this.apiUrl}/${id}`);
   }
 
-  createAnimal(animalData: Animal): Observable<any> {
-    return this.http.post(this.apiUrl, animalData);
+  createAnimal(formData: FormData): Observable<any> {
+    return this.http.post(this.apiUrl, formData);
   }
 
   updateAnimalStatus(id: number, statusId: number): Observable<any> {

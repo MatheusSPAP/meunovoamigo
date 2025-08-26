@@ -13,6 +13,7 @@ import { AnimalService } from '../../services/animal.service';
 })
 export class AnimalListComponent implements OnInit {
   animais: Animal[] = [];
+  apiBaseUrl = 'http://localhost:3000'; // Base URL for media files
 
   constructor(private animalService: AnimalService) { }
 

@@ -1,14 +1,23 @@
 const AnimalDb = require('../db/animalDb');
 const Animal = require('../models/animal');
+const fs = require('fs');
 
 class AnimalController {
 
     // Criar novo animal
     static async create(req, res) {
         try {
-            // Cria um novo objeto com os dados do request e a data de cadastro gerada pelo servidor
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'A foto do animal é obrigatória.',
+                    errors: ['O campo \'foto\' não foi enviado.']
+                });
+            }
+
             const animalData = {
                 ...req.body,
+                foto: req.file.path, // Adiciona o caminho do arquivo salvo
                 castrado: /^(true|1)$/i.test(req.body.castrado),
                 vacinado: /^(true|1)$/i.test(req.body.vacinado),
                 data_cadastro: new Date()
@@ -16,6 +25,8 @@ class AnimalController {
 
             const errors = Animal.validate(animalData);
             if (errors.length > 0) {
+                // Se a validação falhar, deleta o arquivo que foi upado
+                fs.unlinkSync(req.file.path);
                 return res.status(400).json({
                     success: false,
                     message: 'Dados inválidos',
@@ -32,6 +43,10 @@ class AnimalController {
             });
 
         } catch (error) {
+            // Se ocorrer um erro, tenta deletar o arquivo que pode ter sido upado
+            if (req.file) {
+                fs.unlinkSync(req.file.path);
+            }
             console.error('Erro ao criar animal:', error);
             res.status(500).json({
                 success: false,
@@ -39,6 +54,7 @@ class AnimalController {
             });
         }
     }
+
 
     // Listar todos os animais
     static async getAll(req, res) {

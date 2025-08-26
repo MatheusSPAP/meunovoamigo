@@ -20,7 +20,8 @@ export class AnimalDetailComponent implements OnInit {
   successMessage: string = '';
   errorMessage: string = '';
   tutorContact: { nome: string, email: string, telefone: string } | null = null;
-  currentUserId: number | null = null; // Adicionado aqui
+  currentUserId: number | null = null;
+  apiBaseUrl = 'http://localhost:3000'; // Base URL for media files
 
   constructor(
     private route: ActivatedRoute,
