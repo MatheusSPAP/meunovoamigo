@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AnimalService } from '../../services/animal.service';
 import { InteresseAdocaoService } from '../../services/interesse-adocao.service';
@@ -8,8 +8,9 @@ import { RouterLink } from '@angular/router';
 import { UsuarioService } from '../../usuario.service';
 import { PostService } from '../../services/post.service';
 import { Post } from '../../models/post.model';
-import { EventoService } from '../../services/evento.service'; // Adicionado
-import { Evento } from '../../models/evento.model'; // Adicionado
+import { EventoService } from '../../services/evento.service';
+import { Evento } from '../../models/evento.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,7 +19,7 @@ import { Evento } from '../../models/evento.model'; // Adicionado
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   currentUserId: number | null = null;
   currentUserName: string | null = null;
   userAnimals: Animal[] = [];
@@ -27,104 +28,90 @@ export class DashboardComponent implements OnInit {
   pendingInterestsCount: number = 0;
   manifestedInterestsSummary: { aguardando: number, aprovado: number, recusado: number } = { aguardando: 0, aprovado: 0, recusado: 0 };
   recentPosts: Post[] = [];
-  upcomingEvents: Evento[] = []; // Adicionado
+  upcomingEvents: Evento[] = [];
   errorMessage: string = '';
+  private subscription = new Subscription();
 
   constructor(
     private animalService: AnimalService,
     private interesseAdocaoService: InteresseAdocaoService,
     private usuarioService: UsuarioService,
     private postService: PostService,
-    private eventoService: EventoService // Injetado
+    private eventoService: EventoService
   ) { }
 
   ngOnInit(): void {
-    const userId = localStorage.getItem('currentUserId');
-    if (userId) {
-      this.currentUserId = Number(userId);
-      this.loadDashboardData();
-      this.loadUserName();
-    } else {
-      this.errorMessage = 'Você precisa estar logado para ver o dashboard.';
-    }
+    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+      if (userId) {
+        this.currentUserId = userId;
+        this.loadDashboardData();
+      } else {
+        this.currentUserId = null;
+        this.errorMessage = 'Você precisa estar logado para ver o dashboard.';
+      }
+    });
+
+    const nameSub = this.usuarioService.currentUserName$.subscribe(name => {
+      this.currentUserName = name;
+    });
+
+    this.subscription.add(userSub);
+    this.subscription.add(nameSub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   loadDashboardData(): void {
-    if (this.currentUserId) {
-      // Carregar animais do usuário
-      this.animalService.getAnimalsByOwnerId(this.currentUserId).subscribe({
-        next: (response: any) => {
-          this.userAnimals = response.data;
-        },
-        error: (error) => {
-          console.error('Erro ao carregar animais do usuário:', error);
-          this.errorMessage = 'Erro ao carregar seus animais.';
-        }
-      });
+    if (!this.currentUserId) return;
 
-      // Carregar interesses de adoção recebidos
-      this.interesseAdocaoService.getInteressesByDonoAnimal(this.currentUserId).subscribe({
-        next: (response: any) => {
-          this.interessesRecebidos = response.data;
-          this.calculatePendingInterests();
-        },
-        error: (error) => {
-          console.error('Erro ao carregar interesses recebidos:', error);
-          this.errorMessage = 'Erro ao carregar interesses de adoção.';
-        }
-      });
+    this.animalService.getAnimalsByOwnerId(this.currentUserId).subscribe({
+      next: (response: any) => { this.userAnimals = response.data; },
+      error: (error) => {
+        console.error('Erro ao carregar animais do usuário:', error);
+        this.errorMessage = 'Erro ao carregar seus animais.';
+      }
+    });
 
-      // Carregar interesses de adoção manifestados
-      this.interesseAdocaoService.getInteressesByUsuario(this.currentUserId).subscribe({
-        next: (response: any) => {
-          this.interessesManifestados = response.data;
-          this.calculateManifestedInterestsSummary();
-        },
-        error: (error) => {
-          console.error('Erro ao carregar interesses manifestados:', error);
-          this.errorMessage = 'Erro ao carregar seus interesses manifestados.';
-        }
-      });
+    this.interesseAdocaoService.getInteressesByDonoAnimal(this.currentUserId).subscribe({
+      next: (response: any) => {
+        this.interessesRecebidos = response.data;
+        this.calculatePendingInterests();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar interesses recebidos:', error);
+        this.errorMessage = 'Erro ao carregar interesses de adoção.';
+      }
+    });
 
-      // Carregar postagens recentes
-      this.postService.getPosts().subscribe({
-        next: (response: any) => {
-          this.recentPosts = response.data.slice(0, 3); // Limita a 3 postagens
-        },
-        error: (error) => {
-          console.error('Erro ao carregar postagens recentes:', error);
-          this.errorMessage = 'Erro ao carregar postagens recentes.';
-        }
-      });
+    this.interesseAdocaoService.getInteressesByUsuario(this.currentUserId).subscribe({
+      next: (response: any) => {
+        this.interessesManifestados = response.data;
+        this.calculateManifestedInterestsSummary();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar interesses manifestados:', error);
+        this.errorMessage = 'Erro ao carregar seus interesses manifestados.';
+      }
+    });
 
-      // Carregar próximos eventos (Adicionado)
-      const today = new Date().toISOString().slice(0, 10);
-      this.eventoService.getEventosByPeriodo(today, '', 'asc').subscribe({
-        next: (response: any) => {
-          this.upcomingEvents = response.data.slice(0, 3); // Limita a 3 eventos
-        },
-        error: (error) => {
-          console.error('Erro ao carregar próximos eventos:', error);
-          this.errorMessage = 'Erro ao carregar próximos eventos.';
-        }
-      });
-    }
-  }
+    this.postService.getPosts().subscribe({
+      next: (response: any) => { this.recentPosts = response.data.slice(0, 3); },
+      error: (error) => {
+        console.error('Erro ao carregar postagens recentes:', error);
+        this.errorMessage = 'Erro ao carregar postagens recentes.';
+      }
+    });
 
-  loadUserName(): void {
-    if (this.currentUserId) {
-      this.usuarioService.getUserProfile(this.currentUserId).subscribe({
-        next: (response: any) => {
-          if (response.success && response.data && response.data.nome) {
-            this.currentUserName = response.data.nome;
-          }
-        },
-        error: (error) => {
-          console.error('Erro ao carregar nome do usuário:', error);
-          this.currentUserName = null;
-        }
-      });
-    }
+    const today = new Date().toISOString().slice(0, 10);
+    this.eventoService.getEventosByPeriodo(today, '', 'asc').subscribe({
+      next: (response: any) => { this.upcomingEvents = response.data.slice(0, 3); },
+      error: (error) => {
+        console.error('Erro ao carregar próximos eventos:', error);
+        this.errorMessage = 'Erro ao carregar próximos eventos.';
+      }
+    });
   }
 
   calculatePendingInterests(): void {

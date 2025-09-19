@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { PostService } from '../../services/post.service';
@@ -6,6 +6,7 @@ import { UsuarioService } from '../../usuario.service';
 import { AnimalService } from '../../services/animal.service';
 import { Router } from '@angular/router';
 import { Animal } from '../../models/animal.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-post-create',
@@ -14,13 +15,18 @@ import { Animal } from '../../models/animal.model';
   templateUrl: './post-create.html',
   styleUrls: ['./post-create.css']
 })
-export class PostCreateComponent implements OnInit {
+export class PostCreateComponent implements OnInit, OnDestroy {
+  @ViewChild('arquivoInput') arquivoInput!: ElementRef;
+
   postForm: FormGroup;
   successMessage: string = '';
   errorMessage: string = '';
   userAnimals: Animal[] = [];
   selectedFile: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;
+
+  private currentUserId: number | null = null;
+  private subscription = new Subscription();
 
   constructor(
     private postService: PostService,
@@ -36,24 +42,31 @@ export class PostCreateComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadUserAnimals();
+    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+      this.currentUserId = userId;
+      if (userId) {
+        this.loadUserAnimals(userId);
+      } else {
+        this.errorMessage = 'Você precisa estar logado para criar uma postagem.';
+      }
+    });
+    this.subscription.add(userSub);
   }
 
-  loadUserAnimals(): void {
-    const userId = localStorage.getItem('currentUserId');
-    if (userId) {
-      this.animalService.getAnimalsByOwnerId(Number(userId)).subscribe({
-        next: (response: any) => {
-          this.userAnimals = response.data;
-        },
-        error: (error) => {
-          console.error('Erro ao carregar animais do usuário:', error);
-          this.errorMessage = 'Erro ao carregar seus animais. Tente novamente.';
-        }
-      });
-    } else {
-      this.errorMessage = 'Você precisa estar logado para criar uma postagem.';
-    }
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  loadUserAnimals(userId: number): void {
+    this.animalService.getAnimalsByOwnerId(userId).subscribe({
+      next: (response: any) => {
+        this.userAnimals = response.data;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar animais do usuário:', error);
+        this.errorMessage = 'Erro ao carregar seus animais. Tente novamente.';
+      }
+    });
   }
 
   onFileSelected(event: Event): void {
@@ -62,7 +75,6 @@ export class PostCreateComponent implements OnInit {
     if (fileList && fileList.length > 0) {
       this.selectedFile = fileList[0];
       
-      // Gerar preview da imagem
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreview = reader.result;
@@ -75,6 +87,14 @@ export class PostCreateComponent implements OnInit {
     }
   }
 
+  removeSelectedFile(): void {
+    this.selectedFile = null;
+    this.imagePreview = null;
+    if (this.arquivoInput) {
+      this.arquivoInput.nativeElement.value = '';
+    }
+  }
+
   onSubmit(): void {
     this.successMessage = '';
     this.errorMessage = '';
@@ -84,8 +104,7 @@ export class PostCreateComponent implements OnInit {
       return;
     }
 
-    const userId = localStorage.getItem('currentUserId');
-    if (!userId) {
+    if (!this.currentUserId) {
       this.errorMessage = 'Você precisa estar logado para criar uma postagem.';
       return;
     }
@@ -93,7 +112,7 @@ export class PostCreateComponent implements OnInit {
     const formData = new FormData();
     formData.append('titulo', this.postForm.get('titulo')!.value);
     formData.append('descricao', this.postForm.get('descricao')!.value);
-    formData.append('usuario_idusuario', userId);
+    formData.append('usuario_idusuario', this.currentUserId.toString());
 
     const animalId = this.postForm.get('animal_idAnimal')!.value;
     if (animalId) {
@@ -110,7 +129,6 @@ export class PostCreateComponent implements OnInit {
         this.successMessage = 'Postagem criada com sucesso!';
         this.postForm.reset();
         this.imagePreview = null;
-        // Redirecionar após um pequeno atraso para o usuário ver a mensagem
         setTimeout(() => this.router.navigate(['/postagens']), 1500);
       },
       error: (error) => {

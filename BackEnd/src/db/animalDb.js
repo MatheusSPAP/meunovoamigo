@@ -2,8 +2,9 @@ const db = require('./dbConfig');
 
 class AnimalDb {
 
-    static async insert(model) {
-        const conn = await db.connect();
+    static async insert(model, connection = null) {
+        const newConnection = !connection;
+        const conn = newConnection ? await db.connect() : connection;
 
         const nome = model.nome;
         const sexo = model.sexo;
@@ -27,10 +28,10 @@ class AnimalDb {
             const [result] = await conn.execute(query, [nome, sexo, foto, descricao, castrado, vacinado, 
                 data_cadastro, fk_idusuario, fk_idstatus, tipo_idtipo_animal, tamanho_animal_idtamanho_animal, 
                 comportamento_idcomportamento, fk_idraca]);
-            conn.release();
+            if (newConnection) conn.release();
             return result;
         } catch (error) {
-            conn.release();
+            if (newConnection) conn.release();
             throw error;
         }
     }

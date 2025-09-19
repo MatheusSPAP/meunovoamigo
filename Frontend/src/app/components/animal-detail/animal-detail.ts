@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { AnimalService } from '../../services/animal.service';
 import { Animal } from '../../models/animal.model';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { InteresseAdocaoService } from '../../services/interesse-adocao.service';
+import { UsuarioService } from '../../usuario.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-animal-detail',
@@ -13,7 +15,7 @@ import { InteresseAdocaoService } from '../../services/interesse-adocao.service'
   templateUrl: './animal-detail.html',
   styleUrls: ['./animal-detail.css']
 })
-export class AnimalDetailComponent implements OnInit {
+export class AnimalDetailComponent implements OnInit, OnDestroy {
   animal: Animal | undefined;
   interesseForm: FormGroup;
   showInterestForm: boolean = false;
@@ -21,12 +23,14 @@ export class AnimalDetailComponent implements OnInit {
   errorMessage: string = '';
   tutorContact: { nome: string, email: string, telefone: string } | null = null;
   currentUserId: number | null = null;
-  apiBaseUrl = 'http://localhost:3000'; // Base URL for media files
+  apiBaseUrl = 'http://localhost:3000';
+  private subscription = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
     private animalService: AnimalService,
-    private interesseAdocaoService: InteresseAdocaoService
+    private interesseAdocaoService: InteresseAdocaoService,
+    private usuarioService: UsuarioService
   ) {
     this.interesseForm = new FormGroup({
       mensagem: new FormControl('', [Validators.required, Validators.maxLength(255)])
@@ -34,19 +38,25 @@ export class AnimalDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    const routeSub = this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
       if (id) {
         this.animalService.getAnimalById(id).subscribe((response: any) => {
-          this.animal = response.data; // Assuming the backend returns { data: Animal }
+          this.animal = response.data;
         });
       }
     });
-    // Certifique-se de que currentUserId é definido aqui
-    const userId = localStorage.getItem('currentUserId');
-    if (userId) {
-      this.currentUserId = Number(userId);
-    }
+
+    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+      this.currentUserId = userId;
+    });
+
+    this.subscription.add(routeSub);
+    this.subscription.add(userSub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   toggleInterestForm(): void {
@@ -63,15 +73,14 @@ export class AnimalDetailComponent implements OnInit {
     this.tutorContact = null;
 
     if (this.interesseForm.valid && this.animal) {
-      const userId = localStorage.getItem('currentUserId');
-      if (!userId) {
+      if (!this.currentUserId) {
         this.errorMessage = 'Você precisa estar logado para manifestar interesse.';
         return;
       }
 
       const interesseData = {
         mensagem: this.interesseForm.value.mensagem,
-        usuario_idusuario: Number(userId),
+        usuario_idusuario: this.currentUserId,
         animal_idAnimal: this.animal.idAnimal
       };
 

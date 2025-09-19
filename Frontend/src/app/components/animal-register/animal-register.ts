@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { AnimalService } from '../../services/animal.service';
 import { UsuarioService } from '../../usuario.service';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 // Import Models
 import { Tipo } from '../../models/tipo.model';
@@ -26,7 +27,7 @@ import { StatusService } from '../../services/status.service';
   templateUrl: './animal-register.html',
   styleUrls: ['./animal-register.css']
 })
-export class AnimalRegisterComponent implements OnInit {
+export class AnimalRegisterComponent implements OnInit, OnDestroy {
   animalForm: FormGroup;
   successMessage: string = '';
   errorMessage: string = '';
@@ -40,6 +41,9 @@ export class AnimalRegisterComponent implements OnInit {
 
   selectedFile: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;
+
+  private currentUserId: number | null = null;
+  private subscription = new Subscription();
 
   constructor(
     private animalService: AnimalService,
@@ -66,6 +70,14 @@ export class AnimalRegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDropdownData();
+    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+      this.currentUserId = userId;
+    });
+    this.subscription.add(userSub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   loadDropdownData(): void {
@@ -117,8 +129,7 @@ export class AnimalRegisterComponent implements OnInit {
       return;
     }
 
-    const userId = localStorage.getItem('currentUserId');
-    if (!userId) {
+    if (!this.currentUserId) {
       this.errorMessage = 'Você precisa estar logado para cadastrar um animal.';
       return;
     }
@@ -132,7 +143,7 @@ export class AnimalRegisterComponent implements OnInit {
     Object.keys(this.animalForm.controls).forEach(key => {
       formData.append(key, this.animalForm.get(key)!.value);
     });
-    formData.append('fk_idusuario', userId);
+    formData.append('fk_idusuario', this.currentUserId.toString());
     formData.append('fk_idstatus', this.disponivelStatusId.toString());
     formData.append('foto', this.selectedFile, this.selectedFile.name);
 

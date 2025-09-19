@@ -11,9 +11,13 @@ export class UsuarioService {
   private apiUrl = 'http://localhost:3000/api/usuarios';
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   private _currentUserName = new BehaviorSubject<string | null>(null);
+  private _currentUserId = new BehaviorSubject<number | null>(null); // Added
 
   isLoggedIn$ = this._isLoggedIn.asObservable();
   currentUserName$ = this._currentUserName.asObservable();
+  currentUserId$ = this._currentUserId.asObservable(); // Added
+
+  constructor(private http: HttpClient, private router: Router) { }
 
   getUserProfile(userId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/${userId}`);
@@ -31,34 +35,32 @@ export class UsuarioService {
     return this.http.patch(`${this.apiUrl}/${userId}/password`, { currentPassword, newPassword });
   }
 
-  // Método síncrono para verificações rápidas em componentes, se necessário
   isLoggedIn(): boolean {
     return this._isLoggedIn.value;
   }
 
-  setAuthState(isLoggedIn: boolean, userName: string | null = null) {
+  // Modified to accept userId
+  setAuthState(isLoggedIn: boolean, userName: string | null = null, userId: number | null = null) {
     this._isLoggedIn.next(isLoggedIn);
     this._currentUserName.next(userName);
+    this._currentUserId.next(userId);
   }
-
-  constructor(private http: HttpClient, private router: Router) { }
 
   login(credentials: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
       tap((response: any) => {
         if (response.success && response.data && response.data.idusuario) {
-          localStorage.setItem('currentUserId', response.data.idusuario);
-          this._isLoggedIn.next(true);
-          this._currentUserName.next(response.data.nome); // Set the user's name here
+          sessionStorage.setItem('currentUserId', response.data.idusuario);
+          // Use the new setAuthState
+          this.setAuthState(true, response.data.nome, response.data.idusuario);
         }
       })
     );
   }
 
   logout(): void {
-    localStorage.removeItem('currentUserId');
-    this._isLoggedIn.next(false);
-    this._currentUserName.next(null);
-    this.router.navigate(['/']); // Redireciona para a home (login)
+    sessionStorage.removeItem('currentUserId'); // Corrected from localStorage
+    this.setAuthState(false, null, null); // Use the new setAuthState
+    this.router.navigate(['/']);
   }
 }

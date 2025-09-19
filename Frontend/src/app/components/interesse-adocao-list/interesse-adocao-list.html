@@ -43,7 +43,7 @@
           </div>
           <p><strong>Mensagem:</strong> {{ interesse.mensagem }}</p>
           <p><strong>Data:</strong> {{ interesse.data_interesse | date:'dd/MM/yyyy' }}</p>
-          <div class="contact-info" *ngIf="interesse.interesse_status !== 'Aguardando'">
+          <div class="contact-info">
             <h4>Contato do Interessado:</h4>
             <p><strong>Nome:</strong> {{ interesse.nome_interessado }}</p>
             <p><strong>Email:</strong> {{ interesse.interessado_email }}</p>

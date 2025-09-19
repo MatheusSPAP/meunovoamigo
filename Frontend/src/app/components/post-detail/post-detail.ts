@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { PostService } from '../../services/post.service';
@@ -9,6 +9,7 @@ import { MidiaService } from '../../services/midia.service';
 import { Midia } from '../../models/midia.model';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { UsuarioService } from '../../usuario.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-post-detail',
@@ -17,14 +18,17 @@ import { UsuarioService } from '../../usuario.service';
   templateUrl: './post-detail.html',
   styleUrls: ['./post-detail.css']
 })
-export class PostDetailComponent implements OnInit {
+export class PostDetailComponent implements OnInit, OnDestroy {
   post: Post | undefined;
   comentarios: Comentario[] = [];
   medias: Midia[] = [];
   comentarioForm: FormGroup;
   successMessage: string = '';
   errorMessage: string = '';
-  apiBaseUrl = 'http://localhost:3000'; // Base URL for media files
+  apiBaseUrl = 'http://localhost:3000';
+
+  private currentUserId: number | null = null;
+  private subscription = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
@@ -39,7 +43,7 @@ export class PostDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    const routeSub = this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
       if (id) {
         this.postService.getPostById(id).subscribe((response: any) => {
@@ -49,6 +53,17 @@ export class PostDetailComponent implements OnInit {
         });
       }
     });
+
+    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+      this.currentUserId = userId;
+    });
+
+    this.subscription.add(routeSub);
+    this.subscription.add(userSub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   loadComentarios(postId: number): void {
@@ -80,15 +95,14 @@ export class PostDetailComponent implements OnInit {
     this.errorMessage = '';
 
     if (this.comentarioForm.valid && this.post) {
-      const userId = localStorage.getItem('currentUserId');
-      if (!userId) {
+      if (!this.currentUserId) {
         this.errorMessage = 'Você precisa estar logado para comentar.';
         return;
       }
 
       const comentarioData = {
         fk_idcomunidade: this.post.idcomunidade,
-        fk_idusuario: Number(userId),
+        fk_idusuario: this.currentUserId,
         mensagem: this.comentarioForm.value.mensagem
       };
 

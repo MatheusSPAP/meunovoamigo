@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { EventoService } from '../../services/evento.service';
 import { UsuarioService } from '../../usuario.service';
 import { Router } from '@angular/router';
 import { Evento } from '../../models/evento.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-event-create',
@@ -13,11 +14,14 @@ import { Evento } from '../../models/evento.model';
   templateUrl: './event-create.html',
   styleUrls: ['./event-create.css']
 })
-export class EventCreateComponent implements OnInit {
+export class EventCreateComponent implements OnInit, OnDestroy {
   eventForm: FormGroup;
   successMessage: string = '';
   errorMessage: string = '';
   eventTypes: string[] = ['Feira de Adoção', 'Campanha de Vacinação', 'Mutirão de Castração', 'Outro'];
+
+  private currentUserId: number | null = null;
+  private subscription = new Subscription();
 
   constructor(
     private eventoService: EventoService,
@@ -34,6 +38,14 @@ export class EventCreateComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+      this.currentUserId = userId;
+    });
+    this.subscription.add(userSub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   onSubmit(): void {
@@ -41,15 +53,14 @@ export class EventCreateComponent implements OnInit {
     this.errorMessage = '';
 
     if (this.eventForm.valid) {
-      const userId = localStorage.getItem('currentUserId');
-      if (!userId) {
+      if (!this.currentUserId) {
         this.errorMessage = 'Você precisa estar logado para cadastrar um evento.';
         return;
       }
 
       const eventData: Evento = {
         ...this.eventForm.value,
-        fk_idusuario: Number(userId),
+        fk_idusuario: this.currentUserId,
         idEvento: 0 // Será gerado pelo backend
       };
 

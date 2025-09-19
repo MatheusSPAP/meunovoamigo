@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UsuarioService } from '../../usuario.service';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators, ValidationErrors, AbstractControl } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 // Custom Validator for password matching
 export function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -18,13 +19,16 @@ export function passwordMatchValidator(control: AbstractControl): ValidationErro
   templateUrl: './user-profile.html',
   styleUrls: ['./user-profile.css']
 })
-export class UserProfileComponent implements OnInit {
+export class UserProfileComponent implements OnInit, OnDestroy {
   user: any | undefined;
   errorMessage: string = '';
   successMessage: string = '';
   isEditMode: boolean = false;
   profileForm: FormGroup;
   passwordForm: FormGroup;
+
+  private currentUserId: number | null = null;
+  private subscription = new Subscription();
 
   constructor(
     private usuarioService: UsuarioService,
@@ -46,30 +50,37 @@ export class UserProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadUserProfile();
+    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+      this.currentUserId = userId;
+      if (userId) {
+        this.loadUserProfile(userId);
+      } else {
+        this.errorMessage = 'Usuário não logado. Redirecionando para o login...';
+        this.router.navigate(['/login']);
+      }
+    });
+    this.subscription.add(userSub);
   }
 
-  loadUserProfile(): void {
-    const userId = localStorage.getItem('currentUserId');
-    if (userId) {
-      this.usuarioService.getUserProfile(Number(userId)).subscribe({
-        next: (response) => {
-          if (response.success && response.data) {
-            this.user = response.data;
-            this.profileForm.patchValue(this.user);
-          } else {
-            this.errorMessage = response.message || 'Erro ao carregar perfil.';
-          }
-        },
-        error: (error) => {
-          console.error('Erro ao carregar perfil!', error);
-          this.errorMessage = 'Erro ao carregar perfil. Por favor, tente novamente.';
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  loadUserProfile(userId: number): void {
+    this.usuarioService.getUserProfile(userId).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.user = response.data;
+          this.profileForm.patchValue(this.user);
+        } else {
+          this.errorMessage = response.message || 'Erro ao carregar perfil.';
         }
-      });
-    } else {
-      this.errorMessage = 'Usuário não logado. Redirecionando para o login...';
-      this.router.navigate(['/login']);
-    }
+      },
+      error: (error) => {
+        console.error('Erro ao carregar perfil!', error);
+        this.errorMessage = 'Erro ao carregar perfil. Por favor, tente novamente.';
+      }
+    });
   }
 
   toggleEditMode(): void {
@@ -85,19 +96,13 @@ export class UserProfileComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
 
-    if (this.profileForm.valid && this.user) {
-      const userId = localStorage.getItem('currentUserId');
-      if (!userId) {
-        this.errorMessage = 'Erro: ID do usuário não encontrado.';
-        return;
-      }
-
-      this.usuarioService.updateUserProfile(Number(userId), this.profileForm.value).subscribe({
+    if (this.profileForm.valid && this.currentUserId) {
+      this.usuarioService.updateUserProfile(this.currentUserId, this.profileForm.value).subscribe({
         next: (response) => {
           if (response.success) {
             this.successMessage = 'Perfil atualizado com sucesso!';
             this.isEditMode = false;
-            this.loadUserProfile();
+            this.loadUserProfile(this.currentUserId!);
           } else {
             this.errorMessage = response.message || 'Erro ao atualizar perfil.';
           }
@@ -116,19 +121,13 @@ export class UserProfileComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
 
-    if (this.passwordForm.valid && this.user) {
-      const userId = localStorage.getItem('currentUserId');
-      if (!userId) {
-        this.errorMessage = 'Erro: ID do usuário não encontrado.';
-        return;
-      }
-
+    if (this.passwordForm.valid && this.currentUserId) {
       const passwords = {
         currentPassword: this.passwordForm.value.currentPassword,
         newPassword: this.passwordForm.value.newPassword
       };
 
-      this.usuarioService.updateUserPassword(Number(userId), this.passwordForm.value.currentPassword, this.passwordForm.value.newPassword).subscribe({
+      this.usuarioService.updateUserPassword(this.currentUserId, this.passwordForm.value.currentPassword, this.passwordForm.value.newPassword).subscribe({
         next: (response) => {
           if (response.success) {
             this.successMessage = 'Senha alterada com sucesso!';
