@@ -20,7 +20,7 @@ export const routes: Routes = [
     { path: '', component: HomeComponent }, // Home now handles login/register
 
     // Protected Routes
-    { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] }, // New Dashboard route
+    { path: 'dashboard', component: AnimalListComponent, canActivate: [AuthGuard] }, // New Dashboard route
     { path: 'animais', component: AnimalListComponent, canActivate: [AuthGuard] },
     { path: 'animais/:id', component: AnimalDetailComponent, canActivate: [AuthGuard] },
     { path: 'postagens', component: PostListComponent, canActivate: [AuthGuard] },

@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Tipo } from '../models/tipo.model';
 
+import { map } from 'rxjs/operators';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -12,6 +14,6 @@ export class TipoService {
   constructor(private http: HttpClient) { }
 
   getTipos(): Observable<Tipo[]> {
-    return this.http.get<Tipo[]>(this.apiUrl);
+    return this.http.get<any>(this.apiUrl).pipe(map(response => response.data));
   }
 }

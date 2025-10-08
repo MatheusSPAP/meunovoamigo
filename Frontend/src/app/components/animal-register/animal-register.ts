@@ -81,15 +81,15 @@ export class AnimalRegisterComponent implements OnInit, OnDestroy {
   }
 
   loadDropdownData(): void {
-    this.tipoService.getTipos().subscribe((response: any) => { this.tipos = response.data; });
-    this.tamanhoAnimalService.getTamanhos().subscribe((response: any) => { this.tamanhos = response.data; });
-    this.comportamentoService.getComportamentos().subscribe((response: any) => { this.comportamentos = response.data; });
-    this.racaService.getRacas().subscribe((response: any) => {
-      this.racas = response.data;
-      this.filteredRacas = this.racas;
+    this.tipoService.getTipos().subscribe(data => { this.tipos = data; });
+    this.tamanhoAnimalService.getTamanhos().subscribe(data => { this.tamanhos = data; });
+    this.comportamentoService.getComportamentos().subscribe(data => { this.comportamentos = data; });
+    this.racaService.getRacas().subscribe(data => {
+      this.racas = data;
+      this.filteredRacas = data;
     });
-    this.statusService.getStatus().subscribe((response: any) => {
-      const disponivelStatus = response.data.find((status: Status) => status.tipo === 'Disponível');
+    this.statusService.getStatus().subscribe(data => {
+      const disponivelStatus = data.find((status: Status) => status.tipo === 'Disponível');
       if (disponivelStatus) {
         this.disponivelStatusId = disponivelStatus.idstatus;
       }

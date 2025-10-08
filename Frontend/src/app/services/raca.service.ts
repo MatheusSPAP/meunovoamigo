@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Raca } from '../models/raca.model';
 
+import { map } from 'rxjs/operators';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -12,10 +14,10 @@ export class RacaService {
   constructor(private http: HttpClient) { }
 
   getRacas(): Observable<Raca[]> {
-    return this.http.get<Raca[]>(this.apiUrl);
+    return this.http.get<any>(this.apiUrl).pipe(map(response => response.data));
   }
 
   getRacasByTipo(tipoId: number): Observable<Raca[]> {
-    return this.http.get<Raca[]>(`${this.apiUrl}/tipo/${tipoId}`);
+    return this.http.get<any>(`${this.apiUrl}/tipo/${tipoId}`).pipe(map(response => response.data));
   }
 }

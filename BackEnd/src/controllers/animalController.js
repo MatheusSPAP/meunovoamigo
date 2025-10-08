@@ -109,7 +109,19 @@ class AnimalController {
     // Listar todos os animais
     static async getAll(req, res) {
         try {
-            const animais = await AnimalDb.selectAll();
+            // Extrai os filtros da query string
+            const { tipoId, tamanhoId, racaId, nome, status } = req.query;
+
+            // Monta o objeto de filtros
+            const filters = {
+                tipoId,
+                tamanhoId,
+                racaId,
+                nome,
+                status: status || 'Disponível' // Define 'Disponível' como padrão se nenhum status for passado
+            };
+
+            const animais = await AnimalDb.selectAll(filters);
 
             res.status(200).json({
                 success: true,

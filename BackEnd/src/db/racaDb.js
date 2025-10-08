@@ -67,6 +67,21 @@ class RacaDb {
         }
     }
 
+    static async selectByTipo(tipoId) {
+        const conn = await db.connect();
+
+        const query = 'SELECT * FROM raca WHERE tipo_idtipo_animal = ?';
+        
+        try {
+            const [result] = await conn.execute(query, [tipoId]);
+            conn.release();
+            return result;
+        } catch (error) {
+            conn.release();
+            throw error;
+        }
+    }
+
     static async delete(id) {
         const conn = await db.connect();
 
