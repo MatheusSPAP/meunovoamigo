@@ -13,6 +13,7 @@ import { PostService } from '../../services/post.service';
 })
 export class PostListComponent implements OnInit {
   posts: Post[] = [];
+  apiBaseUrl = 'http://localhost:3000'; // Base URL for media files
 
   constructor(private postService: PostService) { }
 

@@ -27,7 +27,8 @@ class PostagemDb {
     static async selectAll() {
         const conn = await db.connect();
 
-        const query = `SELECT p.*, u.nome as nome_usuario, a.nome as nome_animal, a.foto as foto_animal
+        const query = `SELECT p.*, u.nome as nome_usuario, a.nome as nome_animal, a.foto as foto_animal,
+                              (SELECT m.caminho FROM midia m WHERE m.postagem_idcomunidade = p.idcomunidade ORDER BY m.idmidia LIMIT 1) as imagem_post
                        FROM postagem p
                        LEFT JOIN usuario u ON p.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON p.animal_idAnimal = a.idAnimal

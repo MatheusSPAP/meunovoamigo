@@ -1,19 +1,31 @@
+<div class="community-header">
+  <h1>Comunidade</h1>
+  <a routerLink="/criar-postagem" class="btn-create-post">+ Criar Nova Postagem</a>
+</div>
+
 <div class="post-feed-container">
-  <div *ngFor="let post of posts" class="post-card" [routerLink]="['/postagens', post.idcomunidade]">
-    <div class="post-meta">
-      <p class="post-author">Por {{ post.nome_usuario || 'Usuário desconhecido' }}</p>
-      <p class="post-date">em {{ post.data_postagem | date:'dd/MM/yyyy' }}</p>
-    </div>
+  <div *ngFor="let post of posts" class="post-card">
+    
+    <a [routerLink]="['/postagens', post.idcomunidade]" class="post-image-link" *ngIf="post.imagem_post">
+      <img [src]="apiBaseUrl + '/' + post.imagem_post" alt="Imagem da postagem: {{ post.titulo }}" class="post-image">
+    </a>
 
-    <div *ngIf="post.animal_idAnimal" class="post-animal-info">
-      <img *ngIf="post.foto_animal" [src]="post.foto_animal" [alt]="post.nome_animal" class="animal-photo-feed">
-      <p>Sobre: <strong>{{ post.nome_animal }}</strong></p>
-    </div>
+    <div class="post-card-content">
+      <div class="post-meta">
+        <p class="post-author">Por {{ post.nome_usuario || 'Usuário desconhecido' }}</p>
+        <p class="post-date">em {{ post.data_postagem | date:'dd/MM/yyyy' }}</p>
+      </div>
 
-    <div class="post-content">
-      <h3>{{ post.titulo }}</h3>
-      <p>{{ post.descricao | slice:0:150 }}...</p>
-      <a [routerLink]="['/postagens', post.idcomunidade]" class="btn-link">Ler mais</a>
+      <div *ngIf="post.animal_idAnimal" class="post-animal-info">
+        <img *ngIf="post.foto_animal" [src]="apiBaseUrl + '/' + post.foto_animal" [alt]="post.nome_animal" class="animal-photo-feed">
+        <p>Sobre: <strong>{{ post.nome_animal }}</strong></p>
+      </div>
+
+      <div class="post-content">
+        <h3 [routerLink]="['/postagens', post.idcomunidade]">{{ post.titulo }}</h3>
+        <p>{{ post.descricao | slice:0:150 }}...</p>
+        <a [routerLink]="['/postagens', post.idcomunidade]" class="btn-link">Ler mais</a>
+      </div>
     </div>
   </div>
 </div>

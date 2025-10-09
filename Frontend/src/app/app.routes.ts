@@ -8,7 +8,7 @@ import { UserProfileComponent } from './components/user-profile/user-profile';
 import { PostListComponent } from './components/post-list/post-list';
 import { EventListComponent } from './components/event-list/event-list';
 import { AuthGuard } from './guards/auth.guard';
-import { DashboardComponent } from './components/dashboard/dashboard';
+
 import { InteresseAdocaoListComponent } from './components/interesse-adocao-list/interesse-adocao-list';
 import { AnimalRegisterComponent } from './components/animal-register/animal-register';
 import { PostCreateComponent } from './components/post-create/post-create';
