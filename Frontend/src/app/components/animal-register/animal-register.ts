@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { AnimalService } from '../../services/animal.service';
 import { UsuarioService } from '../../usuario.service';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 // Import Models
 import { Tipo } from '../../models/tipo.model';
@@ -26,7 +27,7 @@ import { StatusService } from '../../services/status.service';
   templateUrl: './animal-register.html',
   styleUrls: ['./animal-register.css']
 })
-export class AnimalRegisterComponent implements OnInit {
+export class AnimalRegisterComponent implements OnInit, OnDestroy {
   animalForm: FormGroup;
   successMessage: string = '';
   errorMessage: string = '';
@@ -35,8 +36,14 @@ export class AnimalRegisterComponent implements OnInit {
   tamanhos: TamanhoAnimal[] = [];
   comportamentos: Comportamento[] = [];
   racas: Raca[] = [];
-  filteredRacas: Raca[] = []; // For filtering by animal type
+  filteredRacas: Raca[] = [];
   disponivelStatusId: number | null = null;
+
+  selectedFile: File | null = null;
+  imagePreview: string | ArrayBuffer | null = null;
+
+  private currentUserId: number | null = null;
+  private subscription = new Subscription();
 
   constructor(
     private animalService: AnimalService,
@@ -51,7 +58,6 @@ export class AnimalRegisterComponent implements OnInit {
     this.animalForm = new FormGroup({
       nome: new FormControl('', [Validators.required]),
       sexo: new FormControl('', [Validators.required]),
-      foto: new FormControl('', [Validators.required]), // Consider file upload later
       descricao: new FormControl('', [Validators.required]),
       castrado: new FormControl(false),
       vacinado: new FormControl(false),
@@ -64,18 +70,26 @@ export class AnimalRegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDropdownData();
+    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+      this.currentUserId = userId;
+    });
+    this.subscription.add(userSub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   loadDropdownData(): void {
-    this.tipoService.getTipos().subscribe((response: any) => { this.tipos = response.data; });
-    this.tamanhoAnimalService.getTamanhos().subscribe((response: any) => { this.tamanhos = response.data; });
-    this.comportamentoService.getComportamentos().subscribe((response: any) => { this.comportamentos = response.data; });
-    this.racaService.getRacas().subscribe((response: any) => {
-      this.racas = response.data;
-      this.filteredRacas = this.racas;
+    this.tipoService.getTipos().subscribe(data => { this.tipos = data; });
+    this.tamanhoAnimalService.getTamanhos().subscribe(data => { this.tamanhos = data; });
+    this.comportamentoService.getComportamentos().subscribe(data => { this.comportamentos = data; });
+    this.racaService.getRacas().subscribe(data => {
+      this.racas = data;
+      this.filteredRacas = data;
     });
-    this.statusService.getStatus().subscribe((response: any) => {
-      const disponivelStatus = response.data.find((status: Status) => status.tipo === 'Disponível');
+    this.statusService.getStatus().subscribe(data => {
+      const disponivelStatus = data.find((status: Status) => status.tipo === 'Disponível');
       if (disponivelStatus) {
         this.disponivelStatusId = disponivelStatus.idstatus;
       }
@@ -89,46 +103,60 @@ export class AnimalRegisterComponent implements OnInit {
     } else {
       this.filteredRacas = this.racas;
     }
-    this.animalForm.get('fk_idraca')?.setValue(''); // Reset selected race
+    this.animalForm.get('fk_idraca')?.setValue('');
+  }
+
+  onFileSelected(event: Event): void {
+    const element = event.currentTarget as HTMLInputElement;
+    let fileList: FileList | null = element.files;
+    if (fileList && fileList.length > 0) {
+      this.selectedFile = fileList[0];
+      const reader = new FileReader();
+      reader.onload = () => { this.imagePreview = reader.result; };
+      reader.readAsDataURL(this.selectedFile);
+    } else {
+      this.selectedFile = null;
+      this.imagePreview = null;
+    }
   }
 
   onSubmit(): void {
     this.successMessage = '';
     this.errorMessage = '';
 
-    if (this.animalForm.valid) {
-      const userId = localStorage.getItem('currentUserId');
-      if (!userId) {
-        this.errorMessage = 'Você precisa estar logado para cadastrar um animal.';
-        return;
-      }
-
-      if (!this.disponivelStatusId) {
-        this.errorMessage = 'Não foi possível definir o status padrão do animal. Tente novamente mais tarde.';
-        return;
-      }
-
-      const animalData = {
-        ...this.animalForm.value,
-        fk_idusuario: Number(userId), // Assign current logged-in user as owner
-        fk_idstatus: this.disponivelStatusId
-      };
-
-      this.animalService.createAnimal(animalData).subscribe({
-        next: (response) => {
-          console.log('Animal cadastrado com sucesso!', response);
-          this.successMessage = 'Animal cadastrado com sucesso!';
-          this.animalForm.reset();
-          // Optionally redirect to animal list or detail page
-          this.router.navigate(['/animais']);
-        },
-        error: (error) => {
-          console.error('Erro ao cadastrar animal!', error);
-          this.errorMessage = error.error.message || 'Erro ao cadastrar animal. Tente novamente.';
-        }
-      });
-    } else {
-      this.errorMessage = 'Por favor, preencha todos os campos obrigatórios.';
+    if (this.animalForm.invalid || !this.selectedFile) {
+      this.errorMessage = 'Por favor, preencha todos os campos obrigatórios e selecione uma foto.';
+      return;
     }
+
+    if (!this.currentUserId) {
+      this.errorMessage = 'Você precisa estar logado para cadastrar um animal.';
+      return;
+    }
+
+    if (!this.disponivelStatusId) {
+      this.errorMessage = 'Não foi possível definir o status padrão do animal. Tente novamente mais tarde.';
+      return;
+    }
+
+    const formData = new FormData();
+    Object.keys(this.animalForm.controls).forEach(key => {
+      formData.append(key, this.animalForm.get(key)!.value);
+    });
+    formData.append('fk_idusuario', this.currentUserId.toString());
+    formData.append('fk_idstatus', this.disponivelStatusId.toString());
+    formData.append('foto', this.selectedFile, this.selectedFile.name);
+
+    this.animalService.createAnimal(formData).subscribe({
+      next: (response) => {
+        this.successMessage = 'Animal cadastrado com sucesso!';
+        this.animalForm.reset();
+        this.imagePreview = null;
+        setTimeout(() => this.router.navigate(['/dashboard']), 1500);
+      },
+      error: (error) => {
+        this.errorMessage = error.error.message || 'Erro ao cadastrar animal. Tente novamente.';
+      }
+    });
   }
 }

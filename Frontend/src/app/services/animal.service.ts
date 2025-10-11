@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Animal } from '../models/animal.model';
 
@@ -11,16 +11,22 @@ export class AnimalService {
 
   constructor(private http: HttpClient) { }
 
-  getAnimais(): Observable<Animal[]> {
-    return this.http.get<Animal[]>(this.apiUrl);
+  getAnimais(filters: any = {}): Observable<Animal[]> {
+    let params = new HttpParams();
+    Object.keys(filters).forEach(key => {
+      if (filters[key]) { // Only add non-empty filters
+        params = params.append(key, filters[key]);
+      }
+    });
+    return this.http.get<Animal[]>(this.apiUrl, { params });
   }
 
   getAnimalById(id: number): Observable<Animal> {
     return this.http.get<Animal>(`${this.apiUrl}/${id}`);
   }
 
-  createAnimal(animalData: Animal): Observable<any> {
-    return this.http.post(this.apiUrl, animalData);
+  createAnimal(formData: FormData): Observable<any> {
+    return this.http.post(this.apiUrl, formData);
   }
 
   updateAnimalStatus(id: number, statusId: number): Observable<any> {

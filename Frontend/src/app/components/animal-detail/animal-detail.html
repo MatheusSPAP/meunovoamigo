@@ -1,7 +1,7 @@
 <div *ngIf="animal" class="animal-detail-container">
   <h2>{{ animal.nome }}</h2>
   <div class="animal-info">
-    <img [src]="animal.foto" [alt]="animal.nome" class="animal-image">
+    <img [src]="apiBaseUrl + '/' + animal.foto" [alt]="animal.nome" class="animal-image">
     <div class="details">
       <p><strong>Sexo:</strong> {{ animal.sexo === 'M' ? 'Macho' : 'Fêmea' }}</p>
       <p><strong>Status:</strong> <span [class.disponivel]="animal.status_tipo === 'Disponível'" [class.adotado]="animal.status_tipo === 'Adotado'">{{ animal.status_tipo }}</span></p>

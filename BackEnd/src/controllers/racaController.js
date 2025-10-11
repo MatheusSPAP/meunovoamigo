@@ -110,6 +110,25 @@ class RacaController {
         }
     }
 
+    static async getByTipo(req, res) {
+        try {
+            const { tipoId } = req.params;
+            const racas = await RacaDb.selectByTipo(tipoId);
+
+            res.status(200).json({
+                success: true,
+                data: racas
+            });
+
+        } catch (error) {
+            console.error('Erro ao buscar raças por tipo:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
+
     static async delete(req, res) {
         try {
             const { id } = req.params;

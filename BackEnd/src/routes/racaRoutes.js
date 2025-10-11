@@ -9,4 +9,6 @@ router.post('/', RacaController.create);
 router.put('/:id', RacaController.update);
 router.delete('/:id', RacaController.delete);
 
+router.get('/tipo/:tipoId', RacaController.getByTipo);
+
 module.exports = router;

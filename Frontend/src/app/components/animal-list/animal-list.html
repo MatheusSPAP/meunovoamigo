@@ -1,9 +1,58 @@
-<div class="animal-grid">
+<div class="page-header" *ngIf="!showFilters">
+  <h1>Encontre seu novo melhor amigo</h1>
+  <p>Esses são os animais que aguardam um lar. Explore e se apaixone!</p>
+</div>
+
+<div class="cta-banner" *ngIf="!showFilters">
+  <p>Quer uma busca mais específica? Use nossos filtros!</p>
+  <a routerLink="/animais" class="btn-primary">Busca Avançada</a>
+</div>
+
+<div *ngIf="showFilters" class="filter-container">
+  <form [formGroup]="filterForm" class="filter-form">
+    <h3>Encontre seu novo amigo</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="nome">Nome</label>
+        <input id="nome" type="text" formControlName="nome" placeholder="Digite o nome do animal">
+      </div>
+      <div class="form-group">
+        <label for="tipo">Tipo</label>
+        <select id="tipo" formControlName="tipoId">
+          <option [ngValue]="null">Todos</option>
+          <option *ngFor="let tipo of tipos$ | async" [value]="tipo.idtipo_animal">{{ tipo.tipo_animal }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="tamanho">Tamanho</label>
+        <select id="tamanho" formControlName="tamanhoId">
+          <option [ngValue]="null">Todos</option>
+          <option *ngFor="let tamanho of tamanhos$ | async" [value]="tamanho.idtamanho_animal">{{ tamanho.descricao }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="raca">Raça</label>
+        <select id="raca" formControlName="racaId">
+          <option [ngValue]="null">Todas</option>
+          <option *ngFor="let raca of racas$ | async" [value]="raca.idraca">{{ raca.tipo_raca }}</option>
+        </select>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div *ngIf="animais.length > 0; else noAnimals" class="animal-grid">
   <div *ngFor="let animal of animais" class="animal-card" [routerLink]="['/animais', animal.idAnimal]">
-    <img [src]="animal.foto" [alt]="animal.nome">
+    <img [src]="apiBaseUrl + '/' + animal.foto" [alt]="animal.nome">
     <h3>{{ animal.nome }}</h3>
-    <p class="animal-status" [class.disponivel]="animal.status_tipo === 'Disponível'" [class.adotado]="animal.status_tipo === 'Adotado'">
+    <p class="animal-status" [class.disponivel]="animal.status_tipo === 'Disponível'">
       Status: {{ animal.status_tipo }}
     </p>
   </div>
 </div>
+
+<ng-template #noAnimals>
+  <div class="no-animals-found">
+    <p>Nenhum animal encontrado com os filtros selecionados. Tente uma busca diferente!</p>
+  </div>
+</ng-template>

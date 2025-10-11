@@ -19,7 +19,7 @@ export class PostService {
     return this.http.get<Post>(`${this.apiUrl}/${id}`);
   }
 
-  createPost(postData: Post): Observable<any> {
-    return this.http.post(this.apiUrl, postData);
+  createPost(formData: FormData): Observable<any> {
+    return this.http.post(this.apiUrl, formData);
   }
 }

@@ -33,6 +33,16 @@
       </select>
     </div>
 
+    <div>
+      <label for="arquivo">Mídia (opcional):</label>
+      <input type="file" id="arquivo" accept="image/*,video/*" (change)="onFileSelected($event)" #arquivoInput>
+    </div>
+
+    <div *ngIf="imagePreview" class="image-preview-container">
+      <img [src]="imagePreview" alt="Pré-visualização da imagem" class="image-preview">
+      <button type="button" class="remove-btn" (click)="removeSelectedFile()" title="Remover imagem">X</button>
+    </div>
+
     <button type="submit" [disabled]="!postForm.valid">Criar Postagem</button>
   </form>
 </div>

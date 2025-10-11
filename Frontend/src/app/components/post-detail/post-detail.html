@@ -13,6 +13,16 @@
     <p class="post-description">{{ post.descricao }}</p>
   </div>
 
+  <!-- Media Gallery Section -->
+  <div *ngIf="medias.length > 0" class="media-gallery">
+    <div *ngFor="let media of medias" class="media-item">
+      <img *ngIf="media.tipo === 'foto'" [src]="apiBaseUrl + '/' + media.caminho" [alt]="media.nome_arquivo" class="post-media-image">
+      <video *ngIf="media.tipo === 'video'" [src]="apiBaseUrl + '/' + media.caminho" controls class="post-media-video">
+        Seu navegador não suporta o elemento de vídeo.
+      </video>
+    </div>
+  </div>
+
   <div class="comments-section">
     <h3>Comentários</h3>
     <div *ngIf="comentarios.length === 0" class="no-comments-message">

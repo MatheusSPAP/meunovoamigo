@@ -2,8 +2,9 @@ const db = require('./dbConfig');
 
 class PostagemDb {
 
-    static async insert(model) {
-        const conn = await db.connect();
+    static async insert(model, connection = null) {
+        const newConnection = !connection;
+        const conn = newConnection ? await db.connect() : connection;
 
         const descricao = model.descricao;
         const data_postagem = model.data_postagem;
@@ -15,10 +16,10 @@ class PostagemDb {
 
         try {
             const [result] = await conn.execute(query, [descricao, data_postagem, titulo, animal_idAnimal, usuario_idusuario]);
-            conn.release();
+            if (newConnection) conn.release();
             return result;
         } catch (error) {
-            conn.release();
+            if (newConnection) conn.release();
             throw error;
         }
     }
@@ -26,7 +27,8 @@ class PostagemDb {
     static async selectAll() {
         const conn = await db.connect();
 
-        const query = `SELECT p.*, u.nome as nome_usuario, a.nome as nome_animal, a.foto as foto_animal
+        const query = `SELECT p.*, u.nome as nome_usuario, a.nome as nome_animal, a.foto as foto_animal,
+                              (SELECT m.caminho FROM midia m WHERE m.postagem_idcomunidade = p.idcomunidade ORDER BY m.idmidia LIMIT 1) as imagem_post
                        FROM postagem p
                        LEFT JOIN usuario u ON p.usuario_idusuario = u.idusuario
                        LEFT JOIN animal a ON p.animal_idAnimal = a.idAnimal

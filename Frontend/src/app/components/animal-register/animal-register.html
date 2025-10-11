@@ -30,11 +30,13 @@
     </div>
 
     <div>
-      <label for="foto">URL da Foto:</label>
-      <input type="text" id="foto" formControlName="foto">
-      <div *ngIf="animalForm.get('foto')?.invalid && (animalForm.get('foto')?.dirty || animalForm.get('foto')?.touched)">
-        Foto é obrigatória.
-      </div>
+      <label for="foto">Foto:</label>
+      <input type="file" id="foto" (change)="onFileSelected($event)" accept="image/*" required>
+    </div>
+
+    <!-- Image preview -->
+    <div *ngIf="imagePreview" class="image-preview-container">
+      <img [src]="imagePreview" alt="Pré-visualização da imagem" class="image-preview">
     </div>
 
     <div>

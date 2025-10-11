@@ -10,4 +10,5 @@ export interface Post {
   nome_usuario?: string;
   nome_animal?: string;
   foto_animal?: string;
+  imagem_post?: string; // Image from the post's media
 }

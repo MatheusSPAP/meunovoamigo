@@ -20,12 +20,7 @@
           </div>
           <p><strong>Mensagem:</strong> {{ interesse.mensagem }}</p>
           <p><strong>Data:</strong> {{ interesse.data_interesse | date:'dd/MM/yyyy' }}</p>
-          <div *ngIf="interesse.dono_email" class="contact-info">
-            <h4>Contato do Tutor:</h4>
-            <p><strong>Nome:</strong> {{ interesse.nome_dono_animal }}</p>
-            <p><strong>Email:</strong> {{ interesse.dono_email }}</p>
-            <p><strong>Telefone:</strong> {{ interesse.dono_telefone }}</p>
-          </div>
+
         </div>
       </div>
       <div *ngIf="interessesManifestados.length === 0 && !errorMessage" class="no-content-message">
@@ -43,12 +38,7 @@
           </div>
           <p><strong>Mensagem:</strong> {{ interesse.mensagem }}</p>
           <p><strong>Data:</strong> {{ interesse.data_interesse | date:'dd/MM/yyyy' }}</p>
-          <div class="contact-info" *ngIf="interesse.interesse_status !== 'Aguardando'">
-            <h4>Contato do Interessado:</h4>
-            <p><strong>Nome:</strong> {{ interesse.nome_interessado }}</p>
-            <p><strong>Email:</strong> {{ interesse.interessado_email }}</p>
-            <p><strong>Telefone:</strong> {{ interesse.interessado_telefone }}</p>
-          </div>
+
           <div class="actions" *ngIf="interesse.interesse_status === 'Aguardando'">
             <button (click)="aprovarInteresse(interesse.idinteresse_adocao, interesse.animal_idAnimal)" class="btn-aprovar">Aprovar</button>
             <button (click)="recusarInteresse(interesse.idinteresse_adocao)" class="btn-recusar">Recusar</button>

@@ -8,7 +8,7 @@ import { UserProfileComponent } from './components/user-profile/user-profile';
 import { PostListComponent } from './components/post-list/post-list';
 import { EventListComponent } from './components/event-list/event-list';
 import { AuthGuard } from './guards/auth.guard';
-import { DashboardComponent } from './components/dashboard/dashboard';
+
 import { InteresseAdocaoListComponent } from './components/interesse-adocao-list/interesse-adocao-list';
 import { AnimalRegisterComponent } from './components/animal-register/animal-register';
 import { PostCreateComponent } from './components/post-create/post-create';
@@ -20,7 +20,7 @@ export const routes: Routes = [
     { path: '', component: HomeComponent }, // Home now handles login/register
 
     // Protected Routes
-    { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] }, // New Dashboard route
+    { path: 'dashboard', component: AnimalListComponent, canActivate: [AuthGuard] }, // New Dashboard route
     { path: 'animais', component: AnimalListComponent, canActivate: [AuthGuard] },
     { path: 'animais/:id', component: AnimalDetailComponent, canActivate: [AuthGuard] },
     { path: 'postagens', component: PostListComponent, canActivate: [AuthGuard] },

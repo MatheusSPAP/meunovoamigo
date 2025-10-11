@@ -10,14 +10,14 @@ import { switchMap, catchError } from 'rxjs/operators';
 export function initializeAuth(usuarioService: UsuarioService): () => Promise<any> {
   return () =>
     new Promise<void>((resolve) => {
-      const userId = localStorage.getItem('currentUserId');
+      const userId = sessionStorage.getItem('currentUserId');
       if (userId) {
         usuarioService
           .getUserProfile(Number(userId))
           .pipe(
             switchMap((response: any) => {
               if (response.success && response.data) {
-                usuarioService.setAuthState(true, response.data.nome);
+                usuarioService.setAuthState(true, response.data.nome, response.data.idusuario);
               } else {
                 usuarioService.setAuthState(false);
               }

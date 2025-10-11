@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InteresseAdocao } from '../../models/interesse-adocao.model';
 import { InteresseAdocaoService } from '../../services/interesse-adocao.service';
@@ -6,6 +6,7 @@ import { UsuarioService } from '../../usuario.service';
 import { AnimalService } from '../../services/animal.service';
 import { StatusService } from '../../services/status.service';
 import { Status } from '../../models/status.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-interesse-adocao-list',
@@ -14,13 +15,14 @@ import { Status } from '../../models/status.model';
   templateUrl: './interesse-adocao-list.html',
   styleUrls: ['./interesse-adocao-list.css']
 })
-export class InteresseAdocaoListComponent implements OnInit {
+export class InteresseAdocaoListComponent implements OnInit, OnDestroy {
   interessesManifestados: InteresseAdocao[] = [];
   interessesRecebidos: InteresseAdocao[] = [];
   currentUserId: number | null = null;
   errorMessage: string = '';
   statuses: Status[] = [];
-  selectedTab: 'manifested' | 'received' = 'manifested'; // Adicionado
+  selectedTab: 'manifested' | 'received' = 'manifested';
+  private subscription = new Subscription();
 
   constructor(
     private interesseAdocaoService: InteresseAdocaoService,
@@ -30,38 +32,45 @@ export class InteresseAdocaoListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const userId = localStorage.getItem('currentUserId');
-    if (userId) {
-      this.currentUserId = Number(userId);
-      this.loadInteresses();
-      this.loadStatuses();
-    } else {
-      this.errorMessage = 'Você precisa estar logado para ver os interesses de adoção.';
-    }
+    this.loadStatuses();
+    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+      if (userId) {
+        this.currentUserId = userId;
+        this.loadInteresses();
+      } else {
+        this.currentUserId = null;
+        this.errorMessage = 'Você precisa estar logado para ver os interesses de adoção.';
+      }
+    });
+    this.subscription.add(userSub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   loadInteresses(): void {
-    if (this.currentUserId) {
-      this.interesseAdocaoService.getInteressesByUsuario(this.currentUserId).subscribe({
-        next: (response: any) => {
-          this.interessesManifestados = response.data;
-        },
-        error: (error) => {
-          console.error('Erro ao carregar interesses manifestados:', error);
-          this.errorMessage = 'Erro ao carregar interesses manifestados.';
-        }
-      });
+    if (!this.currentUserId) return;
 
-      this.interesseAdocaoService.getInteressesByDonoAnimal(this.currentUserId).subscribe({
-        next: (response: any) => {
-          this.interessesRecebidos = response.data;
-        },
-        error: (error) => {
-          console.error('Erro ao carregar interesses recebidos:', error);
-          this.errorMessage = 'Erro ao carregar interesses recebidos.';
-        }
-      });
-    }
+    this.interesseAdocaoService.getInteressesByUsuario(this.currentUserId).subscribe({
+      next: (response: any) => {
+        this.interessesManifestados = response.data;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar interesses manifestados:', error);
+        this.errorMessage = 'Erro ao carregar interesses manifestados.';
+      }
+    });
+
+    this.interesseAdocaoService.getInteressesByDonoAnimal(this.currentUserId).subscribe({
+      next: (response: any) => {
+        this.interessesRecebidos = response.data;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar interesses recebidos:', error);
+        this.errorMessage = 'Erro ao carregar interesses recebidos.';
+      }
+    });
   }
 
   loadStatuses(): void {

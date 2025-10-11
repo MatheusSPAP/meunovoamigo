@@ -11,14 +11,18 @@
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 20px;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease-in-out;
+  overflow: hidden; /* Ensures image corners are rounded */
 }
 
 .post-card:hover {
   transform: translateY(-5px);
+}
+
+.post-card-content {
+  padding: 20px;
 }
 
 .post-meta {
@@ -69,6 +73,12 @@
   margin-bottom: 10px;
   color: #333;
   font-size: 1.5em;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.post-content h3:hover {
+  color: #0056b3;
 }
 
 .post-content p {
@@ -88,4 +98,45 @@
 
 .btn-link:hover {
   text-decoration: underline;
+}
+
+/* Community Header */
+.community-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 800px;
+  margin: 20px auto 10px auto;
+  padding: 0 20px;
+}
+
+.community-header h1 {
+  font-size: 2.5rem;
+  color: #333;
+}
+
+.btn-create-post {
+  background-color: #007bff;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.btn-create-post:hover {
+  background-color: #0056b3;
+}
+
+/* Post Card with Image */
+.post-image-link {
+  display: block;
+}
+
+.post-image {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
 }
