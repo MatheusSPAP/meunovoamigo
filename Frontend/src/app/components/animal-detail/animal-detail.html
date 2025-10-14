@@ -13,37 +13,14 @@
     </div>
   </div>
 
-  <div *ngIf="animal.status_tipo === 'Disponível' && animal.fk_idusuario !== currentUserId">
-    <button (click)="toggleInterestForm()" class="interest-button">Manifestar Interesse</button>
-
-    <div *ngIf="showInterestForm" class="interest-form-section">
-      <h3>Manifestar Interesse em Adoção</h3>
-      <form [formGroup]="interesseForm" (ngSubmit)="onSubmitInteresse()">
-        <div>
-          <label for="mensagem">Mensagem:</label>
-          <textarea id="mensagem" formControlName="mensagem" rows="4"></textarea>
-          <div *ngIf="interesseForm.get('mensagem')?.invalid && (interesseForm.get('mensagem')?.dirty || interesseForm.get('mensagem')?.touched)">
-            Mensagem é obrigatória e deve ter no máximo 255 caracteres.
-          </div>
-        </div>
-        <button type="submit" [disabled]="!interesseForm.valid">Enviar Interesse</button>
-      </form>
-    </div>
+  <div *ngIf="animal.status_tipo === 'Disponível' && animal.fk_idusuario !== currentUserId" class="chat-button-container">
+    <button (click)="startChat()" class="chat-button">Iniciar Conversa com o Tutor</button>
   </div>
 
   <div *ngIf="animal.status_tipo === 'Adotado'" class="status-adotado-message">
     <p>Este animal já encontrou um lar! ❤️</p>
   </div>
 
-  <div *ngIf="successMessage" class="success-message">
-    <p>{{ successMessage }}</p>
-    <div *ngIf="tutorContact" class="tutor-contact-info">
-      <h4>Dados do Tutor:</h4>
-      <p><strong>Nome:</strong> {{ tutorContact.nome }}</p>
-      <p><strong>Email:</strong> {{ tutorContact.email }}</p>
-      <p><strong>Telefone:</strong> {{ tutorContact.telefone }}</p>
-    </div>
-  </div>
   <div *ngIf="errorMessage" class="error-message">
     {{ errorMessage }}
   </div>

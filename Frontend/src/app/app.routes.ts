@@ -15,6 +15,8 @@ import { PostCreateComponent } from './components/post-create/post-create';
 import { PostDetailComponent } from './components/post-detail/post-detail';
 import { EventCreateComponent } from './components/event-create/event-create'; // Adicionado
 import { EventDetailComponent } from './components/event-detail/event-detail'; // Adicionado
+import { ChatListComponent } from './components/chat-list/chat-list';
+import { ChatWindowComponent } from './components/chat-window/chat-window';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent }, // Home now handles login/register
@@ -32,6 +34,8 @@ export const routes: Routes = [
     { path: 'perfil', component: UserProfileComponent, canActivate: [AuthGuard] },
     { path: 'interesses-adocao', component: InteresseAdocaoListComponent, canActivate: [AuthGuard] },
     { path: 'cadastrar-animal', component: AnimalRegisterComponent, canActivate: [AuthGuard] },
+    { path: 'mensagens', component: ChatListComponent, canActivate: [AuthGuard] },
+    { path: 'mensagens/:id', component: ChatWindowComponent, canActivate: [AuthGuard] },
 
     // Redirect any old /login or /registro attempts to home
     { path: 'login', redirectTo: '', pathMatch: 'full' },

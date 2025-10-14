@@ -53,8 +53,8 @@ export class InteresseAdocaoListComponent implements OnInit, OnDestroy {
     if (!this.currentUserId) return;
 
     this.interesseAdocaoService.getInteressesByUsuario(this.currentUserId).subscribe({
-      next: (response: any) => {
-        this.interessesManifestados = response.data;
+      next: (data) => {
+        this.interessesManifestados = data;
       },
       error: (error) => {
         console.error('Erro ao carregar interesses manifestados:', error);
@@ -63,8 +63,8 @@ export class InteresseAdocaoListComponent implements OnInit, OnDestroy {
     });
 
     this.interesseAdocaoService.getInteressesByDonoAnimal(this.currentUserId).subscribe({
-      next: (response: any) => {
-        this.interessesRecebidos = response.data;
+      next: (data) => {
+        this.interessesRecebidos = data;
       },
       error: (error) => {
         console.error('Erro ao carregar interesses recebidos:', error);
@@ -75,8 +75,8 @@ export class InteresseAdocaoListComponent implements OnInit, OnDestroy {
 
   loadStatuses(): void {
     this.statusService.getStatus().subscribe({
-      next: (response: any) => {
-        this.statuses = response.data;
+      next: (data) => {
+        this.statuses = data;
       },
       error: (error) => {
         console.error('Erro ao carregar status:', error);

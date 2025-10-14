@@ -106,6 +106,21 @@ class InteresseAdocaoDb {
         }
     }
 
+    static async selectByUsuarioAndAnimal(idusuario, idAnimal) {
+        const conn = await db.connect();
+
+        const query = `SELECT * FROM interesse_adocao WHERE usuario_idusuario = ? AND animal_idAnimal = ?`;
+        
+        try {
+            const [result] = await conn.execute(query, [idusuario, idAnimal]);
+            conn.release();
+            return result[0];
+        } catch (error) {
+            conn.release();
+            throw error;
+        }
+    }
+
     static async selectByDonoAnimal(idusuario) {
         const conn = await db.connect();
 

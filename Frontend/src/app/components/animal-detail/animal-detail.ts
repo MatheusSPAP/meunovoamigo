@@ -1,41 +1,36 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AnimalService } from '../../services/animal.service';
 import { Animal } from '../../models/animal.model';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { InteresseAdocaoService } from '../../services/interesse-adocao.service';
 import { UsuarioService } from '../../usuario.service';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
+import { ChatService } from '../../services/chat.service';
+import { InteresseAdocaoService } from '../../services/interesse-adocao.service';
 
 @Component({
   selector: 'app-animal-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule],
   templateUrl: './animal-detail.html',
   styleUrls: ['./animal-detail.css']
 })
 export class AnimalDetailComponent implements OnInit, OnDestroy {
   animal: Animal | undefined;
-  interesseForm: FormGroup;
-  showInterestForm: boolean = false;
   successMessage: string = '';
   errorMessage: string = '';
-  tutorContact: { nome: string, email: string, telefone: string } | null = null;
   currentUserId: number | null = null;
   apiBaseUrl = 'http://localhost:3000';
   private subscription = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private animalService: AnimalService,
-    private interesseAdocaoService: InteresseAdocaoService,
-    private usuarioService: UsuarioService
-  ) {
-    this.interesseForm = new FormGroup({
-      mensagem: new FormControl('', [Validators.required, Validators.maxLength(255)])
-    });
-  }
+    private usuarioService: UsuarioService,
+    private chatService: ChatService,
+    private interesseAdocaoService: InteresseAdocaoService
+  ) { }
 
   ngOnInit(): void {
     const routeSub = this.route.paramMap.subscribe(params => {
@@ -59,46 +54,37 @@ export class AnimalDetailComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  toggleInterestForm(): void {
-    this.showInterestForm = !this.showInterestForm;
-    this.successMessage = '';
-    this.errorMessage = '';
-    this.tutorContact = null;
-    this.interesseForm.reset();
-  }
-
-  onSubmitInteresse(): void {
-    this.successMessage = '';
-    this.errorMessage = '';
-    this.tutorContact = null;
-
-    if (this.interesseForm.valid && this.animal) {
-      if (!this.currentUserId) {
-        this.errorMessage = 'Você precisa estar logado para manifestar interesse.';
-        return;
-      }
-
-      const interesseData = {
-        mensagem: this.interesseForm.value.mensagem,
-        usuario_idusuario: this.currentUserId,
-        animal_idAnimal: this.animal.idAnimal
-      };
-
-      this.interesseAdocaoService.createInteresseAdocao(interesseData).subscribe({
-        next: (response) => {
-          console.log('Interesse de adoção registrado com sucesso!', response);
-          this.successMessage = response.message;
-          this.tutorContact = response.data;
-          this.showInterestForm = false;
-          this.interesseForm.reset();
-        },
-        error: (error) => {
-          console.error('Erro ao registrar interesse de adoção!', error);
-          this.errorMessage = error.error.message || 'Erro ao registrar interesse. Tente novamente.';
-        }
-      });
-    } else {
-      this.errorMessage = 'Por favor, preencha a mensagem.';
+  startChat(): void {
+    if (!this.currentUserId || !this.animal) {
+      this.errorMessage = 'Você precisa estar logado para iniciar uma conversa.';
+      return;
     }
+
+    const interesseData = {
+      mensagem: 'Tenho interesse em adotar este animal.',
+      usuario_idusuario: this.currentUserId,
+      animal_idAnimal: this.animal.idAnimal
+    };
+
+    const createInteresse$ = this.interesseAdocaoService.createInteresseAdocao(interesseData);
+    const startConversation$ = this.chatService.startConversation(this.animal.idAnimal, this.currentUserId);
+
+    forkJoin([createInteresse$, startConversation$]).subscribe({
+      next: ([interesseResult, conversation]) => {
+        console.log('Interesse criado:', interesseResult);
+        this.router.navigate(['/mensagens', conversation.id]);
+      },
+      error: (error) => {
+        // Check if the error is because the interest already exists
+        if (error.error && error.error.message && error.error.message.includes('já manifestou interesse')) {
+          // If interest already exists, just start the chat
+          this.chatService.startConversation(this.animal!.idAnimal, this.currentUserId!).subscribe(conversation => {
+            this.router.navigate(['/mensagens', conversation.id]);
+          });
+        } else {
+          this.errorMessage = error.error.message || 'Erro ao iniciar a conversa. Tente novamente.';
+        }
+      }
+    });
   }
 }

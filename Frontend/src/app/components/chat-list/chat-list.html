@@ -1,0 +1,34 @@
+<div class="chat-list-container">
+  <div class="chat-list-header">
+    <h1>Minhas Mensagens</h1>
+  </div>
+
+  <div *ngIf="conversations$ | async as conversations; else loading">
+    <div *ngIf="conversations.length > 0; else noConversations" class="conversations">
+      <a *ngFor="let conv of conversations" [routerLink]="['/mensagens', conv.id]" class="conversation-item" routerLinkActive="active-conversation">
+        <img [src]="apiBaseUrl + '/' + conv.animal_foto" [alt]="conv.animal_nome" class="animal-avatar">
+        <div class="conversation-details">
+          <div class="conversation-header">
+            <span class="participant-name">{{ getOtherParticipantName(conv) }}</span>
+          </div>
+          <p class="animal-name">Sobre: {{ conv.animal_nome }}</p>
+          <!-- Last message could be added here in the future -->
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <ng-template #loading>
+    <div class="loading-spinner">
+      <p>Carregando conversas...</p>
+    </div>
+  </ng-template>
+
+  <ng-template #noConversations>
+    <div class="no-conversations-message">
+      <p>Você ainda não tem nenhuma conversa.</p>
+      <p>Inicie uma conversa manifestando interesse em um animal!</p>
+      <a routerLink="/dashboard" class="btn-primary">Ver animais disponíveis</a>
+    </div>
+  </ng-template>
+</div>

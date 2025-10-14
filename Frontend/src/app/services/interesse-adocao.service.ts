@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { InteresseAdocao } from '../models/interesse-adocao.model';
 
 @Injectable({
@@ -12,7 +13,7 @@ export class InteresseAdocaoService {
   constructor(private http: HttpClient) { }
 
   getInteressesAdocao(): Observable<InteresseAdocao[]> {
-    return this.http.get<InteresseAdocao[]>(this.apiUrl);
+    return this.http.get<any>(this.apiUrl).pipe(map(res => res.data));
   }
 
   createInteresseAdocao(data: { mensagem: string, usuario_idusuario: number, animal_idAnimal: number }): Observable<any> {
@@ -25,11 +26,11 @@ export class InteresseAdocaoService {
   }
 
   getInteressesByUsuario(userId: number): Observable<InteresseAdocao[]> {
-    return this.http.get<InteresseAdocao[]>(`${this.apiUrl}/usuario/${userId}`);
+    return this.http.get<any>(`${this.apiUrl}/usuario/${userId}`).pipe(map(res => res.data));
   }
 
   getInteressesByDonoAnimal(ownerId: number): Observable<InteresseAdocao[]> {
-    return this.http.get<InteresseAdocao[]>(`${this.apiUrl}/dono/${ownerId}`); // Corrected URL
+    return this.http.get<any>(`${this.apiUrl}/dono/${ownerId}`).pipe(map(res => res.data));
   }
 
   updateInteresseStatus(id: number, status: string): Observable<any> {
