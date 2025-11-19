@@ -73,17 +73,31 @@ class UsuarioDb {
         const conn = await db.connect();
 
         const idusuario = model.idusuario;
-        const nome = model.nome;
-        const telefone = model.telefone;
-        const email = model.email;
-        const senha = model.senha;
-        const cidade = model.cidade;
-        const endereco = model.endereco;
+        
+        // Campos permitidos para atualização através deste método
+        const allowedFields = ['nome', 'telefone', 'email', 'cidade', 'endereco'];
+        const fieldsToUpdate = [];
+        const values = [];
 
-        const query = 'UPDATE usuario SET nome = ?, telefone = ?, email = ?, senha = ?, cidade = ?, endereco = ? WHERE idusuario = ?';
+        for (const field of allowedFields) {
+            if (model[field] !== undefined) {
+                fieldsToUpdate.push(`${field} = ?`);
+                values.push(model[field]);
+            }
+        }
+
+        if (fieldsToUpdate.length === 0) {
+            conn.release();
+            // Retorna um objeto similar ao que o mysql2 retornaria, indicando que nada mudou.
+            return { affectedRows: 0, message: 'Nenhum campo para atualizar.' };
+        }
+
+        values.push(idusuario); // Adiciona o id para a cláusula WHERE
+
+        const query = `UPDATE usuario SET ${fieldsToUpdate.join(', ')} WHERE idusuario = ?`;
 
         try {
-            const [result] = await conn.execute(query, [nome, telefone, email, senha, cidade, endereco, idusuario]);
+            const [result] = await conn.execute(query, values);
             conn.release();
             return result;
         } catch (error) {
@@ -107,34 +121,17 @@ class UsuarioDb {
         }
     }
 
-    static async updateUserPassword(id, currentPassword, newPassword) {
+    static async updateUserPassword(id, newPasswordHash) {
         const conn = await db.connect();
         try {
-            const [users] = await conn.execute('SELECT senha FROM usuario WHERE idusuario = ?', [id]);
-            const user = users[0];
-
-            if (!user) {
-                conn.release();
-                return { success: false, message: 'Usuário não encontrado.' };
-            }
-
-            // Comparação de senha em texto puro (INSEGURO - APENAS PARA DEMONSTRAÇÃO)
-            if (user.senha !== currentPassword) {
-                conn.release();
-                return { success: false, message: 'Senha atual incorreta.' };
-            }
-
-            // Atualiza a senha em texto puro (INSEGURO - APENAS PARA DEMONSTRAÇÃO)
-            const updateQuery = 'UPDATE usuario SET senha = ? WHERE idusuario = ?';
-            await conn.execute(updateQuery, [newPassword, id]);
-
+            const query = 'UPDATE usuario SET senha = ? WHERE idusuario = ?';
+            await conn.execute(query, [newPasswordHash, id]);
             conn.release();
-            return { success: true, message: 'Senha atualizada com sucesso.' };
-
+            return { success: true, message: 'Senha atualizada com sucesso no banco de dados.' };
         } catch (error) {
             conn.release();
             console.error('Erro no banco de dados ao atualizar senha:', error);
-            return { success: false, message: 'Erro interno do servidor ao atualizar senha.' };
+            throw error; // Lança o erro para ser tratado pelo controller
         }
     }
 }

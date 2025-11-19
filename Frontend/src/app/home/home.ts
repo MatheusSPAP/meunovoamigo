@@ -43,7 +43,6 @@ export class HomeComponent implements OnInit {
       senha: new FormControl('', { validators: [Validators.required], nonNullable: true })
     });
 
-    // A estrutura do FormGroup espera um objeto de FormControls. A tipagem explícita aqui resolve a ambiguidade.
     this.registroForm = new FormGroup({
       nome: new FormControl('', { validators: [Validators.required], nonNullable: true }),
       email: new FormControl('', { validators: [Validators.required, Validators.email], nonNullable: true }),
@@ -54,7 +53,9 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Remover a verificação de login, o guard cuida disso
+  }
 
   toggleForm(): void {
     this.showLoginForm = !this.showLoginForm;

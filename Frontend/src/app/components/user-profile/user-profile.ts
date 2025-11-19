@@ -50,15 +50,37 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
-      this.currentUserId = userId;
-      if (userId) {
-        this.loadUserProfile(userId);
-      } else {
-        this.errorMessage = 'Usuário não logado. Redirecionando para o login...';
-        this.router.navigate(['/login']);
+    // Primeiro verifica se o usuário está logado
+    const isLoggedInSub = this.usuarioService.isLoggedIn$.subscribe(isLoggedIn => {
+      if (!isLoggedIn) {
+        // Verifica se o userId está na sessionStorage como fallback
+        const userIdFromStorage = sessionStorage.getItem('currentUserId');
+        if (userIdFromStorage) {
+          this.currentUserId = Number(userIdFromStorage);
+          this.loadUserProfile(this.currentUserId);
+        } else {
+          this.errorMessage = 'Usuário não logado. Redirecionando para o login...';
+          this.router.navigate(['/']);
+        }
       }
     });
+
+    // Depois se inscreve no ID do usuário
+    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+      if (userId) {
+        this.currentUserId = userId;
+        this.loadUserProfile(userId);
+      } else {
+        // Verifica novamente a sessionStorage como fallback
+        const userIdFromStorage = sessionStorage.getItem('currentUserId');
+        if (userIdFromStorage) {
+          this.currentUserId = Number(userIdFromStorage);
+          this.loadUserProfile(this.currentUserId);
+        }
+      }
+    });
+
+    this.subscription.add(isLoggedInSub);
     this.subscription.add(userSub);
   }
 

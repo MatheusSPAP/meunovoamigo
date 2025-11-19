@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AnimalService } from '../../services/animal.service';
 import { Animal } from '../../models/animal.model';
 import { UsuarioService } from '../../usuario.service';
-import { Subscription, forkJoin } from 'rxjs';
+import { Subscription, forkJoin, combineLatest } from 'rxjs';
 import { ChatService } from '../../services/chat.service';
 import { InteresseAdocaoService } from '../../services/interesse-adocao.service';
 
@@ -20,6 +20,7 @@ export class AnimalDetailComponent implements OnInit, OnDestroy {
   successMessage: string = '';
   errorMessage: string = '';
   currentUserId: number | null = null;
+  isLoggedIn = false;
   apiBaseUrl = 'http://localhost:3000';
   private subscription = new Subscription();
 
@@ -36,18 +37,33 @@ export class AnimalDetailComponent implements OnInit, OnDestroy {
     const routeSub = this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
       if (id) {
-        this.animalService.getAnimalById(id).subscribe((response: any) => {
-          this.animal = response.data;
+        this.animalService.getAnimalById(id).subscribe({
+          next: (response: any) => {
+            if (response.success && response.data) {
+              this.animal = response.data;
+            } else {
+              this.errorMessage = response.message || 'Animal não encontrado.';
+            }
+          },
+          error: (error) => {
+            console.error('Erro ao carregar animal:', error);
+            this.errorMessage = 'Erro ao carregar os detalhes do animal.';
+          }
         });
       }
     });
 
-    const userSub = this.usuarioService.currentUserId$.subscribe(userId => {
+    // Subscreve tanto no estado de login quanto no ID do usuário
+    const authSub = combineLatest([
+      this.usuarioService.isLoggedIn$,
+      this.usuarioService.currentUserId$
+    ]).subscribe(([isLoggedIn, userId]) => {
+      this.isLoggedIn = isLoggedIn;
       this.currentUserId = userId;
     });
 
     this.subscription.add(routeSub);
-    this.subscription.add(userSub);
+    this.subscription.add(authSub);
   }
 
   ngOnDestroy(): void {
@@ -55,8 +71,17 @@ export class AnimalDetailComponent implements OnInit, OnDestroy {
   }
 
   startChat(): void {
+    if (!this.isLoggedIn) {
+      this.errorMessage = 'Você precisa estar logado para demonstrar interesse.';
+      // Redirecionar para login após um pequeno atraso para mostrar a mensagem
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 2000);
+      return;
+    }
+
     if (!this.currentUserId || !this.animal) {
-      this.errorMessage = 'Você precisa estar logado para iniciar uma conversa.';
+      this.errorMessage = 'Erro ao processar sua solicitação. Tente novamente.';
       return;
     }
 

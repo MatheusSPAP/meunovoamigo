@@ -11,18 +11,18 @@ export class AnimalService {
 
   constructor(private http: HttpClient) { }
 
-  getAnimais(filters: any = {}): Observable<Animal[]> {
+  getAnimais(filters: any = {}): Observable<any> {
     let params = new HttpParams();
     Object.keys(filters).forEach(key => {
       if (filters[key]) { // Only add non-empty filters
         params = params.append(key, filters[key]);
       }
     });
-    return this.http.get<Animal[]>(this.apiUrl, { params });
+    return this.http.get<any>(this.apiUrl, { params });
   }
 
-  getAnimalById(id: number): Observable<Animal> {
-    return this.http.get<Animal>(`${this.apiUrl}/${id}`);
+  getAnimalById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
   createAnimal(formData: FormData): Observable<any> {
@@ -33,7 +33,7 @@ export class AnimalService {
     return this.http.patch(`${this.apiUrl}/status/${id}`, { fk_idstatus: statusId });
   }
 
-  getAnimalsByOwnerId(ownerId: number): Observable<Animal[]> {
-    return this.http.get<Animal[]>(`${this.apiUrl}/usuario/${ownerId}`);
+  getAnimalsByOwnerId(ownerId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/usuario/${ownerId}`);
   }
 }

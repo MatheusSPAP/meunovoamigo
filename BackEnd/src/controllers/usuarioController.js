@@ -1,5 +1,9 @@
 const UsuarioDb = require('../db/usuarioDb');
 const Usuario = require('../models/usuario');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const saltRounds = 10;
 
 class UsuarioController {
 
@@ -24,7 +28,14 @@ class UsuarioController {
                 });
             }
 
-            const result = await UsuarioDb.insert(req.body);
+            // Hash da senha
+            const hashedPassword = await bcrypt.hash(req.body.senha, saltRounds);
+            const newUser = {
+                ...req.body,
+                senha: hashedPassword
+            };
+
+            const result = await UsuarioDb.insert(newUser);
             
             res.status(201).json({
                 success: true,
@@ -37,7 +48,7 @@ class UsuarioController {
             res.status(500).json({
                 success: false,
                 message: 'Erro interno do servidor',
-                error: error.message // Adicionado para depuração
+                error: error.message
             });
         }
     }
@@ -99,15 +110,22 @@ class UsuarioController {
     static async update(req, res) {
         try {
             const { id } = req.params;
+            
+            // Prepara os dados, garantindo que a senha não seja atualizada por este método
             const userData = { ...req.body, idusuario: id };
+            delete userData.senha;
 
             const errors = Usuario.validate(userData);
             if (errors.length > 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Dados inválidos',
-                    errors: errors
-                });
+                // Filtra erros de senha, já que não é responsabilidade deste método
+                const filteredErrors = errors.filter(e => !e.field.includes('senha'));
+                if (filteredErrors.length > 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Dados inválidos',
+                        errors: filteredErrors
+                    });
+                }
             }
 
             // Verificar se usuário existe
@@ -120,12 +138,14 @@ class UsuarioController {
             }
 
             // Verificar se email já está em uso por outro usuário
-            const userWithEmail = await UsuarioDb.selectByEmail(req.body.email);
-            if (userWithEmail && userWithEmail.idusuario != id) {
-                return res.status(409).json({
-                    success: false,
-                    message: 'Email já está em uso'
-                });
+            if (req.body.email) {
+                const userWithEmail = await UsuarioDb.selectByEmail(req.body.email);
+                if (userWithEmail && userWithEmail.idusuario != id) {
+                    return res.status(409).json({
+                        success: false,
+                        message: 'Email já está em uso'
+                    });
+                }
             }
 
             await UsuarioDb.update(userData);
@@ -188,7 +208,16 @@ class UsuarioController {
 
             const usuario = await UsuarioDb.selectByEmail(email);
 
-            if (!usuario || usuario.senha !== senha) {
+            if (!usuario) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Credenciais inválidas'
+                });
+            }
+
+            const isMatch = await bcrypt.compare(senha, usuario.senha);
+
+            if (!isMatch) {
                 return res.status(401).json({
                     success: false,
                     message: 'Credenciais inválidas'
@@ -196,9 +225,18 @@ class UsuarioController {
             }
 
             const user = Usuario.fromDatabase(usuario);
+            
+            // Gerar token JWT
+            const token = jwt.sign(
+                { id: user.idusuario, nome: user.nome },
+                process.env.JWT_SECRET,
+                { expiresIn: '24h' }
+            );
+
             res.status(200).json({
                 success: true,
                 message: 'Login realizado com sucesso',
+                token: token,
                 data: user.toPublic()
             });
 
@@ -224,13 +262,29 @@ class UsuarioController {
                 });
             }
 
-            const result = await UsuarioDb.updateUserPassword(id, currentPassword, newPassword);
-
-            if (result.success) {
-                res.status(200).json(result);
-            } else {
-                res.status(400).json(result);
+            const usuario = await UsuarioDb.selectById(id);
+            if (!usuario) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Usuário não encontrado.'
+                });
             }
+
+            const isMatch = await bcrypt.compare(currentPassword, usuario.senha);
+            if (!isMatch) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Senha atual incorreta.'
+                });
+            }
+
+            const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+            await UsuarioDb.updateUserPassword(id, hashedNewPassword);
+
+            res.status(200).json({
+                success: true,
+                message: 'Senha atualizada com sucesso.'
+            });
 
         } catch (error) {
             console.error('Erro ao atualizar senha do usuário:', error);

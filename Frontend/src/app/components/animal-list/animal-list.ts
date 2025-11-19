@@ -23,13 +23,14 @@ import { debounceTime, switchMap, startWith, map } from 'rxjs/operators';
 export class AnimalListComponent implements OnInit {
   animais: Animal[] = [];
   apiBaseUrl = 'http://localhost:3000';
-  
+
   tipos$: Observable<Tipo[]> = of([]);
   tamanhos$: Observable<TamanhoAnimal[]> = of([]);
   racas$: Observable<Raca[]> = of([]);
 
   filterForm: FormGroup;
   showFilters = false;
+  isPublicList = false;  // Nova propriedade para indicar se é uma lista pública
 
   constructor(
     private animalService: AnimalService,
@@ -49,6 +50,7 @@ export class AnimalListComponent implements OnInit {
 
   ngOnInit(): void {
     this.showFilters = this.router.url.includes('/animais');
+    this.isPublicList = this.router.url === '/adocao' || this.router.url === '/';  // Verifica se está na página pública
 
     if (this.showFilters) {
       this.tipos$ = this.tipoService.getTipos();
@@ -87,5 +89,9 @@ export class AnimalListComponent implements OnInit {
       racaId: filters.racaId || null,
       status: 'Disponível'
     };
+  }
+
+  onImageError(event: any): void {
+    event.target.src = 'assets/images/placeholder-animal.jpg'; // Placeholder image
   }
 }
