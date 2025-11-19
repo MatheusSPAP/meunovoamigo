@@ -36,4 +36,8 @@ export class AnimalService {
   getAnimalsByOwnerId(ownerId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/usuario/${ownerId}`);
   }
+
+  getStats(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/stats`);
+  }
 }

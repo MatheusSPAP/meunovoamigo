@@ -13,6 +13,22 @@ import { Animal } from '../../models/animal.model';
       <header class="public-header">
         <h1>Adote um Novo Amigo</h1>
         <p>Conheça os animais que estão esperando por um lar cheio de amor</p>
+        <div class="mission-statement">
+          <p>Nossa missão é conectar animais que precisam de um lar a pessoas que desejam dar e receber amor. Acreditamos que toda vida é preciosa e que, juntos, podemos transformar o destino de muitos bichinhos.</p>
+        </div>
+
+        <!-- Contadores de Estatísticas -->
+        <div class="stats-counters">
+          <div class="counter">
+            <span class="count">{{ availableCount }}</span>
+            <span class="label">Amigos esperando um lar</span>
+          </div>
+          <div class="counter">
+            <span class="count">{{ adoptedCount }}</span>
+            <span class="label">Finais felizes</span>
+          </div>
+        </div>
+
         <div class="auth-links">
           <a routerLink="/login" class="btn-login">Já tenho uma conta</a>
           <a routerLink="/login" class="btn-register">Quero me cadastrar</a>
@@ -50,6 +66,13 @@ import { Animal } from '../../models/animal.model';
       <div *ngIf="error" class="error">
         <p>Erro ao carregar os animais: {{ error }}</p>
       </div>
+
+      <!-- Seção Ajude-nos a Crescer -->
+      <div class="cta-shelter">
+        <h2>Você é um protetor ou representa um abrigo?</h2>
+        <p>Junte-se a nós e encontre lares amorosos para seus animais. Cadastre-se gratuitamente e gerencie suas adoções de forma simples e eficaz.</p>
+        <a routerLink="/login" class="btn-cta">Quero Cadastrar Meus Animais</a>
+      </div>
     </div>
   `,
   styleUrls: ['./public-animal-list.css']
@@ -59,11 +82,14 @@ export class PublicAnimalListComponent implements OnInit {
   apiBaseUrl = 'http://localhost:3000';
   isLoading = true;
   error: string | null = null;
+  adoptedCount: number = 0;
+  availableCount: number = 0;
 
   constructor(private animalService: AnimalService) {}
 
   ngOnInit(): void {
     this.loadAvailableAnimals();
+    this.loadStats();
   }
 
   loadAvailableAnimals(): void {
@@ -73,7 +99,6 @@ export class PublicAnimalListComponent implements OnInit {
         this.isLoading = false;
         if (response.success && response.data) {
           this.animais = response.data;
-          console.log('Animais carregados:', response.data);
         } else {
           this.error = response.message || 'Nenhum dado retornado';
         }
@@ -82,6 +107,20 @@ export class PublicAnimalListComponent implements OnInit {
         this.isLoading = false;
         this.error = error.message || 'Erro ao carregar os animais';
         console.error('Erro ao carregar animais disponíveis:', error);
+      }
+    });
+  }
+
+  loadStats(): void {
+    this.animalService.getStats().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.adoptedCount = response.data.adotado || 0;
+          this.availableCount = response.data.disponivel || 0;
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao carregar estatísticas:', error);
       }
     });
   }

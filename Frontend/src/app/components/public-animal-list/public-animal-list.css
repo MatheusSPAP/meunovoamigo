@@ -23,6 +23,44 @@
   font-size: 1.2em;
 }
 
+.mission-statement {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f0f8ff;
+  border-left: 5px solid #007bff;
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: left;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Statistics Counters */
+.stats-counters {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 30px 0;
+  color: #fff; /* Cor branca para o texto */
+}
+
+.counter {
+  text-align: center;
+}
+
+.counter .count {
+  font-size: 2.5em;
+  font-weight: bold;
+  display: block;
+}
+
+.counter .label {
+  font-size: 1em;
+}
+
+
+
 .auth-links {
   display: flex;
   justify-content: center;
@@ -156,4 +194,45 @@
   padding: 40px;
   color: #666;
   font-size: 1.2em;
+}
+
+/* CTA for Shelters */
+.cta-shelter {
+  text-align: center;
+  padding: 40px 20px;
+  margin-top: 40px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+}
+
+.cta-shelter h2 {
+  font-size: 2em;
+  margin-bottom: 15px;
+  color: #343a40;
+}
+
+.cta-shelter p {
+  font-size: 1.1em;
+  color: #6c757d;
+  max-width: 600px;
+  margin: 0 auto 25px auto;
+}
+
+.btn-cta {
+  display: inline-block;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.1em;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.btn-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
 }

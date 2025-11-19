@@ -21,11 +21,11 @@ import { ChatListComponent } from './components/chat-list/chat-list';
 import { ChatWindowComponent } from './components/chat-window/chat-window';
 
 export const routes: Routes = [
-    { path: '', component: AnimalListComponent }, // Página pública por padrão
-    { path: 'adocao', component: AnimalListComponent }, // Rota alternativa
+    { path: '', redirectTo: '/animais-disponiveis', pathMatch: 'full' }, // Redireciona para a página pública
+    { path: 'animais-disponiveis', component: PublicAnimalListComponent }, // Rota pública
 
-    // Página pública de detalhes do animal
-    { path: 'animais/:id', component: AnimalDetailComponent }, // Rota pública para detalhes
+    // Página pública de detalhes do animal - Acesso sem login
+    { path: 'animais/:id', component: AnimalDetailComponent },
 
     // Protected Routes
     { path: 'dashboard', component: AnimalListComponent, canActivate: [AuthGuard] }, // New Dashboard route

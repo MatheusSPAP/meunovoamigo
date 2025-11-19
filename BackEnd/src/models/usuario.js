@@ -14,33 +14,33 @@ class Usuario {
         const errors = [];
 
         if (!data.nome || data.nome.trim() === '') {
-            errors.push('Nome é obrigatório');
+            errors.push({ field: 'nome', message: 'Nome é obrigatório' });
         }
 
         if (!data.telefone || data.telefone.trim() === '') {
-            errors.push('Telefone é obrigatório');
+            errors.push({ field: 'telefone', message: 'Telefone é obrigatório' });
         }
 
         if (!data.email || data.email.trim() === '') {
-            errors.push('Email é obrigatório');
+            errors.push({ field: 'email', message: 'Email é obrigatório' });
         }
 
-        if (!data.senha || data.senha.trim() === '') {
-            errors.push('Senha é obrigatória');
+        if (data.senha !== undefined && (!data.senha || data.senha.trim() === '')) {
+            errors.push({ field: 'senha', message: 'Senha é obrigatória' });
         }
 
         if (!data.cidade || data.cidade.trim() === '') {
-            errors.push('Cidade é obrigatória');
+            errors.push({ field: 'cidade', message: 'Cidade é obrigatória' });
         }
 
         if (!data.endereco || data.endereco.trim() === '') {
-            errors.push('Endereço é obrigatório');
+            errors.push({ field: 'endereco', message: 'Endereço é obrigatório' });
         }
 
         // Validação de email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (data.email && !emailRegex.test(data.email)) {
-            errors.push('Email deve ter um formato válido');
+            errors.push({ field: 'email', message: 'Email deve ter um formato válido' });
         }
 
         return errors;
