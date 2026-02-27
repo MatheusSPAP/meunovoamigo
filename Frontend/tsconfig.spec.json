@@ -4,8 +4,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "types": [
-      "jasmine"
+      "jest",
+      "node"
     ]
   },
   "include": [
