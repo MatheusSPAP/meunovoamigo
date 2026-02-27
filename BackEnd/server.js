@@ -18,6 +18,7 @@ const tamanhoAnimalRoutes = require('./src/routes/tamanhoAnimalRoutes');
 const comportamentoRoutes = require('./src/routes/comportamentoRoutes');
 const midiaRoutes = require('./src/routes/midiaRoutes');
 const racaRoutes = require('./src/routes/racaRoutes');
+const conversationRoutes = require('./src/routes/conversationRoutes');
 
 const app = express();
 const PORT = process.env.PORT;
@@ -85,6 +86,7 @@ app.use('/api/tamanhos', tamanhoAnimalRoutes);
 app.use('/api/comportamentos', comportamentoRoutes);
 app.use('/api/midias', midiaRoutes);
 app.use('/api/racas', racaRoutes);
+app.use('/api/conversations', conversationRoutes);
 
 // Middleware de tratamento de erros 404
 app.use('*', (req, res) => {

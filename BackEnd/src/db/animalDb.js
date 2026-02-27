@@ -212,6 +212,24 @@ class AnimalDb {
             throw error;
         }
     }
+
+    static async getStats() {
+        const conn = await db.connect();
+        const query = `
+            SELECT s.tipo, COUNT(a.idAnimal) as count
+            FROM animal a
+            JOIN status s ON a.fk_idstatus = s.idstatus
+            GROUP BY s.tipo
+        `;
+        try {
+            const [rows] = await conn.execute(query);
+            conn.release();
+            return rows;
+        } catch (error) {
+            conn.release();
+            throw error;
+        }
+    }
 }
 
 module.exports = AnimalDb;

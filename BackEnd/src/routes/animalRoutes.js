@@ -6,6 +6,7 @@ const upload = require('../middleware/upload');
 // Rotas para animais
 router.post('/', upload.single('foto'), AnimalController.create);
 router.get('/', AnimalController.getAll);
+router.get('/stats', AnimalController.getStats); // Nova rota para estatísticas
 router.get('/:id', AnimalController.getById);
 router.put('/:id', AnimalController.update);
 router.delete('/:id', AnimalController.delete);

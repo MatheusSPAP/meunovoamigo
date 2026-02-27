@@ -10,6 +10,15 @@ class InteresseAdocaoController {
         try {
             const { mensagem, usuario_idusuario, animal_idAnimal } = req.body;
 
+            // Check for existing interest
+            const existingInteresse = await InteresseAdocaoDb.selectByUsuarioAndAnimal(usuario_idusuario, animal_idAnimal);
+            if (existingInteresse) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'Você já manifestou interesse neste animal.'
+                });
+            }
+
             // 1. Verificar se o animal está disponível para adoção
             const animal = await AnimalDb.selectById(animal_idAnimal);
             if (!animal) {

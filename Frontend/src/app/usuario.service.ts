@@ -17,7 +17,24 @@ export class UsuarioService {
   currentUserName$ = this._currentUserName.asObservable();
   currentUserId$ = this._currentUserId.asObservable(); // Added
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) {
+    // Verifica se o usuário está logado ao inicializar o serviço
+    this.checkLoginStatus();
+  }
+
+  private checkLoginStatus(): void {
+    const userIdFromStorage = sessionStorage.getItem('currentUserId');
+    if (userIdFromStorage) {
+      // Verifica se o token ainda é válido fazendo uma requisição simples
+      // Por enquanto, apenas restauramos o estado com base no ID armazenado
+      const userId = Number(userIdFromStorage);
+      if (!isNaN(userId)) {
+        // Não podemos definitivamente confirmar se o token é válido sem fazer uma requisição,
+        // mas vamos assumir que se o ID está armazenado, o usuário estava logado
+        this.setAuthState(true, null, userId);
+      }
+    }
+  }
 
   getUserProfile(userId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/${userId}`);
@@ -49,9 +66,9 @@ export class UsuarioService {
   login(credentials: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
       tap((response: any) => {
-        if (response.success && response.data && response.data.idusuario) {
+        if (response.success && response.token && response.data && response.data.idusuario) {
+          sessionStorage.setItem('token', response.token); // Store token
           sessionStorage.setItem('currentUserId', response.data.idusuario);
-          // Use the new setAuthState
           this.setAuthState(true, response.data.nome, response.data.idusuario);
         }
       })
@@ -59,8 +76,13 @@ export class UsuarioService {
   }
 
   logout(): void {
-    sessionStorage.removeItem('currentUserId'); // Corrected from localStorage
-    this.setAuthState(false, null, null); // Use the new setAuthState
+    sessionStorage.removeItem('token'); // Remove token
+    sessionStorage.removeItem('currentUserId');
+    this.setAuthState(false, null, null);
     this.router.navigate(['/']);
+  }
+
+  getToken(): string | null {
+    return sessionStorage.getItem('token');
   }
 }

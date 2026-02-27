@@ -1,44 +1,101 @@
-.animal-grid {
+/* Estilos para os cards de animais no mesmo estilo do componente público */
+.animals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
+  margin-top: 20px;
 }
 
 .animal-card {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
 }
 
 .animal-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-5px);
 }
 
-.animal-card img {
+.animal-image {
   width: 100%;
   height: 200px;
+  max-height: 200px;
   object-fit: cover;
+  display: block;
+}
+
+.animal-info {
+  padding: 15px;
+}
+
+.animal-info h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.animal-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.tag {
+  background-color: #e9ecef;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+}
+
+.animal-description {
+  color: #666;
+  margin: 10px 0;
+}
+
+.animal-features {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.feature {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 4px 8px;
   border-radius: 4px;
+  font-size: 0.8em;
 }
 
-.animal-status {
+.animal-actions {
+  padding: 15px;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.btn-details {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
   font-weight: bold;
-  margin-top: 10px;
 }
 
-.animal-status.disponivel {
-  color: #28a745;
+.btn-details:hover {
+  background-color: #218838;
 }
 
-.animal-status.adotado {
-  color: #dc3545;
+.no-animals {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 1.2em;
 }
 
-/* Filter Styles */
+/* Estilos existentes mantidos para filtros e layout */
 .filter-container {
   background-color: #f8f9fa;
   padding: 20px;
@@ -91,14 +148,14 @@
 }
 
 /* No Animals Found Message */
-.no-animals-found {
+.no-animals {
   text-align: center;
   padding: 40px;
   background-color: #f8f9fa;
   border-radius: 8px;
 }
 
-.no-animals-found p {
+.no-animals p {
   font-size: 1.2rem;
   color: #555;
 }

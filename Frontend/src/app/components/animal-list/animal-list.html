@@ -41,18 +41,35 @@
   </form>
 </div>
 
-<div *ngIf="animais.length > 0; else noAnimals" class="animal-grid">
-  <div *ngFor="let animal of animais" class="animal-card" [routerLink]="['/animais', animal.idAnimal]">
-    <img [src]="apiBaseUrl + '/' + animal.foto" [alt]="animal.nome">
-    <h3>{{ animal.nome }}</h3>
-    <p class="animal-status" [class.disponivel]="animal.status_tipo === 'Disponível'">
-      Status: {{ animal.status_tipo }}
-    </p>
+<div *ngIf="animais.length > 0; else noAnimals" class="animals-grid">
+  <div *ngFor="let animal of animais" class="animal-card">
+    <img [src]="apiBaseUrl + '/' + animal.foto" [alt]="animal.nome" class="animal-image" (error)="onImageError($event)">
+    <div class="animal-info">
+      <h3>{{ animal.nome }}</h3>
+      <p class="animal-details">
+        <span class="tag">{{ animal.sexo === 'M' ? 'Macho' : 'Fêmea' }}</span>
+        <span class="tag">{{ animal.tipo_idtipo_animal === 1 ? 'Cachorro' : 'Gato' }}</span>
+        <span class="tag">{{ animal.tamanho_animal_idtamanho_animal === 1 ? 'Pequeno' : animal.tamanho_animal_idtamanho_animal === 2 ? 'Médio' : 'Grande' }}</span>
+        <span class="tag">{{ animal.status_tipo }}</span>
+      </p>
+      <p class="animal-description">{{ animal.descricao }}</p>
+      <div class="animal-features">
+        <span class="feature" *ngIf="animal.vacinado">✓ Vacinado</span>
+        <span class="feature" *ngIf="animal.castrado">✓ Castrado</span>
+      </div>
+    </div>
+    <div class="animal-actions">
+      <a [routerLink]="isPublicList ? ['/login'] : ['/animais', animal.idAnimal]"
+         class="btn-details"
+         [title]="isPublicList ? 'Faça login ou registre-se para ver detalhes e demonstrar interesse' : 'Ver detalhes do animal'">
+         {{ isPublicList ? 'Ver detalhes' : 'Ver detalhes' }}
+      </a>
+    </div>
   </div>
 </div>
 
 <ng-template #noAnimals>
-  <div class="no-animals-found">
+  <div class="no-animals">
     <p>Nenhum animal encontrado com os filtros selecionados. Tente uma busca diferente!</p>
   </div>
 </ng-template>

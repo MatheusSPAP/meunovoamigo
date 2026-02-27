@@ -1,0 +1,29 @@
+<div class="chat-window-container" *ngIf="conversation">
+  <div class="chat-header">
+    <h3>Conversa sobre: {{ conversation.animal_nome }}</h3>
+    <!-- We can add a link back to the list or to the animal's page here -->
+  </div>
+
+  <div class="messages-area" #messagesArea>
+    <div *ngFor="let msg of messages" class="message-wrapper" [ngClass]="{ 'sent': msg.sender_id === currentUserId, 'received': msg.sender_id !== currentUserId }">
+      <div class="message-bubble">
+        <p class="message-text">{{ msg.message_text }}</p>
+        <span class="message-timestamp">{{ msg.sent_at | date:'dd/MM, HH:mm' }}</span>
+      </div>
+    </div>
+    <div *ngIf="messages.length === 0" class="no-messages">
+        <p>Ainda não há mensagens nesta conversa. Envie a primeira!</p>
+    </div>
+  </div>
+
+  <div class="message-input-area">
+    <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="message-form">
+      <input type="text" formControlName="messageText" placeholder="Digite sua mensagem..." autocomplete="off">
+      <button type="submit" [disabled]="messageForm.invalid">Enviar</button>
+    </form>
+  </div>
+</div>
+
+<div *ngIf="!conversation">
+  <p>Carregando conversa...</p>
+</div>

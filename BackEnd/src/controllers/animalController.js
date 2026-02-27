@@ -280,6 +280,38 @@ class AnimalController {
             });
         }
     }
+
+    // Buscar estatísticas de animais
+    static async getStats(req, res) {
+        try {
+            const stats = await AnimalDb.getStats();
+            
+            const response = {
+                adotado: 0,
+                disponivel: 0
+            };
+
+            stats.forEach(stat => {
+                if (stat.tipo.toLowerCase() === 'adotado') {
+                    response.adotado = stat.count;
+                } else if (stat.tipo.toLowerCase() === 'disponível') {
+                    response.disponivel = stat.count;
+                }
+            });
+
+            res.status(200).json({
+                success: true,
+                data: response
+            });
+
+        } catch (error) {
+            console.error('Erro ao buscar estatísticas de animais:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor'
+            });
+        }
+    }
 }
 
 module.exports = AnimalController;

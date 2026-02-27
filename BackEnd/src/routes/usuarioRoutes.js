@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const UsuarioController = require('../controllers/usuarioController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-// Rotas para usuários
-router.post('/', UsuarioController.create);           // POST /usuarios - Criar usuário
-router.get('/', UsuarioController.getAll);            // GET /usuarios - Listar todos os usuários
-router.get('/:id', UsuarioController.getById);        // GET /usuarios/:id - Buscar usuário por ID
-router.put('/:id', UsuarioController.update);         // PUT /usuarios/:id - Atualizar usuário
-router.delete('/:id', UsuarioController.delete);      // DELETE /usuarios/:id - Deletar usuário
-
-// Rota especial para login
+// Rotas públicas (não exigem autenticação)
 router.post('/login', UsuarioController.login);       // POST /usuarios/login - Login
+router.post('/', UsuarioController.create);           // POST /usuarios - Criar usuário
 
-router.patch('/:id/password', UsuarioController.updateUserPassword);
+// Rotas protegidas (exigem autenticação via token JWT)
+router.get('/', authMiddleware, UsuarioController.getAll);            // GET /usuarios - Listar todos os usuários
+router.get('/:id', authMiddleware, UsuarioController.getById);        // GET /usuarios/:id - Buscar usuário por ID
+router.put('/:id', authMiddleware, UsuarioController.update);         // PUT /usuarios/:id - Atualizar usuário
+router.delete('/:id', authMiddleware, UsuarioController.delete);      // DELETE /usuarios/:id - Deletar usuário
+router.patch('/:id/password', authMiddleware, UsuarioController.updateUserPassword); // PATCH /usuarios/:id/password - Atualizar senha
 
 module.exports = router;
 
